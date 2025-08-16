@@ -1,5 +1,7 @@
+
 from sqlmodel import SQLModel, create_engine, Session
 from models.item_model import Item
+from models.item_volume_5m import ItemVolume5m
 import requests
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
@@ -56,10 +58,33 @@ def main():
     
 
 
+def update_item_volume_5m_table(volume_5m_data):
+    """Insert new ItemVolume5m records into the DB every 5 minutes."""
+    for item_id, item_5m in volume_5m_data.get("data", {}).items():
+        item_volume = ItemVolume5m(
+            item_id=int(item_id),
+            timestamp=int(item_5m.get("timestamp", 0)),
+            volume_5m=item_5m.get("totalVolume", 0),
+            avg_high_price=item_5m.get("avgHighPrice"),
+            high_price_volume=item_5m.get("highPriceVolume", 0),
+            avg_low_price=item_5m.get("avgLowPrice"),
+            low_price_volume=item_5m.get("lowPriceVolume", 0)
+        )
+        session.add(item_volume)
+    session.commit()
+
 # Run main every minute if this script is executed directly
 import time
 if __name__ == "__main__":
+    run_count = 0
     while True:
-        main()
+        mapping_data, latest_data, volume_data, volume_5m_data = fetch_all_data()
+        update_database_inner = update_database(latest_data, mapping_data, volume_data)
+        update_database_inner(latest_data, mapping_data, volume_data, volume_5m_data)
+        if run_count % 5 == 0:
+            update_item_volume_5m_table(volume_5m_data)
+            print("ItemVolume5m table updated!")
+        print("Data saved successfully!")
         print("Waiting 60 seconds for next run...")
+        run_count += 1
         time.sleep(60)

@@ -40,4 +40,7 @@ in
 (env.overrideAttrs (_: {
   inherit name;
   NIXUP = "0.0.9";
-} // uvEnv.uvEnvVars)) // { inherit scripts; }
+  PYTHONPATH = ".";
+} // uvEnv.uvEnvVars)) // {
+  inherit scripts;
+}

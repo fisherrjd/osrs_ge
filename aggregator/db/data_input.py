@@ -1,7 +1,9 @@
 from sqlmodel import SQLModel, create_engine, Session
 from aggregator.models.item_model import Item
-from aggregator.models.item_volume_5m import ItemVolume5m
+from aggregator.models.item_volume_5m import ItemSnapshot
 import requests
+import time
+from datetime import datetime
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
 MAPPING_API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"
@@ -35,15 +37,23 @@ def fetch_all_data():
     volume_5m_data = fetch_data(VOLUME_5M_API_URL)
     return mapping_data, latest_data, volume_data, volume_5m_data
 
+
 def update_database(latest_data, mapping_data, volume_data):
     """Update the database with the latest item data."""
+
     def update_database_inner(latest_data, mapping_data, volume_data, volume_5m_data):
-        name_mapping = {str(item["id"]): item.get("name", "Unknown") for item in mapping_data}
+        name_mapping = {
+            str(item["id"]): item.get("name", "Unknown") for item in mapping_data
+        }
         for item_id, prices in latest_data["data"].items():
-            item = Item.from_raw(item_id, name_mapping, prices, volume_data, volume_5m_data)
+            item = Item.from_raw(
+                item_id, name_mapping, prices, volume_data, volume_5m_data
+            )
             session.merge(item)
         session.commit()
+
     return update_database_inner
+
 
 def main():
     """Main function to fetch data and save to the database every minute."""
@@ -54,26 +64,30 @@ def main():
         print("Data saved successfully!")
     except Exception as e:
         print(f"Error: {e}")
-    
 
 
-def update_item_volume_5m_table(volume_5m_data):
-    """Insert new ItemVolume5m records into the DB every 5 minutes."""
-    for item_id, item_5m in volume_5m_data.get("data", {}).items():
-        item_volume = ItemVolume5m(
-            item_id=int(item_id),
-            timestamp=int(item_5m.get("timestamp", 0)),
-            volume_5m=item_5m.get("totalVolume", 0),
-            avg_high_price=item_5m.get("avgHighPrice"),
-            high_price_volume=item_5m.get("highPriceVolume", 0),
-            avg_low_price=item_5m.get("avgLowPrice"),
-            low_price_volume=item_5m.get("lowPriceVolume", 0)
-        )
-        session.add(item_volume)
-    session.commit()
+def ingest_api_data(api_json: dict):
+    now = datetime.utcnow()
+    with Session(engine) as session:
+        for item_id, item_data in api_json["data"].items():
+            high_vol = item_data.get("highPriceVolume", 0) or 0
+            low_vol = item_data.get("lowPriceVolume", 0) or 0
+            total_vol = high_vol + low_vol
+
+            record = ItemSnapshot(
+                item_id=int(item_id),
+                timestamp=now,
+                avg_high_price=item_data.get("avgHighPrice"),
+                high_price_volume=high_vol,
+                avg_low_price=item_data.get("avgLowPrice"),
+                low_price_volume=low_vol,
+                total_volume=total_vol,
+            )
+            session.add(record)
+        session.commit()
+
 
 # Run main every minute if this script is executed directly
-import time
 if __name__ == "__main__":
     run_count = 0
     while True:
@@ -81,7 +95,7 @@ if __name__ == "__main__":
         update_database_inner = update_database(latest_data, mapping_data, volume_data)
         update_database_inner(latest_data, mapping_data, volume_data, volume_5m_data)
         if run_count % 5 == 0:
-            update_item_volume_5m_table(volume_5m_data)
+            ingest_api_data(volume_5m_data)
             print("ItemVolume5m table updated!")
         print("Data saved successfully!")
         print("Waiting 60 seconds for next run...")

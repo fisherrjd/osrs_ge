@@ -5,25 +5,7 @@ from sqlmodel import Session, select, create_engine
 from aggregator.models.item_model import Item
 
 # Auto-refresh every 60 seconds
-REFRESH_INTERVAL = 60
-st_autorefresh(interval=REFRESH_INTERVAL * 1000, key="db_refresh")
-st.components.v1.html(
-    f"""
-<div id='countdown' style='font-size:1.2em; font-weight:bold;'>Refreshing in {REFRESH_INTERVAL} seconds...</div>
-<script>
-var seconds = {REFRESH_INTERVAL};
-var countdown = document.getElementById('countdown');
-setInterval(function() {{
-    seconds--;
-    if (seconds <= 0) {{
-        seconds = {REFRESH_INTERVAL};
-    }}
-    countdown.innerHTML = 'Refreshing in ' + seconds + ' seconds...';
-}}, 1000);
-</script>
-""",
-    height=40,
-)
+st_autorefresh(interval=60 * 1000, key="db_refresh")
 
 engine = create_engine("sqlite:///mydb.sqlite3")
 
@@ -46,12 +28,6 @@ def parse_num(val):
 
 
 # User inputs
-low_price_op = st.selectbox("Low price operator", ["<", ">"])
-low_price_val = st.text_input("Low price value", value="100m")
-high_price_op = st.selectbox("High price operator", ["<", ">"])
-high_price_val = st.text_input("High price value", value="100m")
-margin_op = st.selectbox("Margin operator", [">", "<"])
-margin_val = st.text_input("Margin value", value="100k")
 volume_op = st.selectbox("Volume operator", [">", "<"])
 volume_val = st.text_input("Volume value", value="100")
 
@@ -67,12 +43,7 @@ def compare(val, op, ref):
 
 # Filter items
 filtered_items = [
-    item
-    for item in all_items
-    if compare(item.low, low_price_op, parse_num(low_price_val))
-    and compare(item.high, high_price_op, parse_num(high_price_val))
-    and compare(item.margin, margin_op, parse_num(margin_val))
-    and compare(item.volume, volume_op, parse_num(volume_val))
+    item for item in all_items if compare(item.volume, volume_op, parse_num(volume_val))
 ]
 
 if filtered_items:
@@ -82,15 +53,11 @@ if filtered_items:
         [
             {
                 "Name": item.item_name,
-                "Low": item.low,
-                "High": item.high,
-                "Margin": item.margin,
                 "Volume": item.volume,
             }
             for item in filtered_items
         ]
     )
-    df = df.sort_values(by="Margin", ascending=False)
     st.dataframe(df)
 else:
     st.warning("No items found matching criteria.")

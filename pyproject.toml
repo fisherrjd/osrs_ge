@@ -1,5 +1,5 @@
 [project]
-name = "osrsge"
+name = "osrs_ge"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"

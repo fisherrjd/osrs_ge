@@ -7,7 +7,7 @@
     { }
 }:
 let
-  name = "osrsGE";
+  name = "osrs_ge";
 
   uvEnv = pkgs.uv-nix.mkEnv {
     inherit name; python = pkgs.python313;

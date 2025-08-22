@@ -28,7 +28,7 @@ let
     db = pkgs.pog {
       name = "db";
       script = ''
-        ${uvEnv}/bin/python -m db.data_input
+        ${uvEnv}/bin/python -m aggregator.db.data_input
       '';
     };
   };

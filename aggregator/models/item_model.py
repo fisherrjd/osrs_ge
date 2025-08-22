@@ -1,8 +1,6 @@
-
-
 from sqlmodel import SQLModel, Field
 from datetime import datetime
-from util.margin import ge_margin
+from aggregator.util.margin import ge_margin
 
 # --- Helper functions ---
 def safe_int(val):

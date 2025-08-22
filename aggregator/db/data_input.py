@@ -1,7 +1,6 @@
-
 from sqlmodel import SQLModel, create_engine, Session
-from models.item_model import Item
-from models.item_volume_5m import ItemVolume5m
+from aggregator.models.item_model import Item
+from aggregator.models.item_volume_5m import ItemVolume5m
 import requests
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"

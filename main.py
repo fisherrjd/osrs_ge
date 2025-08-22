@@ -1,2 +1,2 @@
 def main():
-    print("Hello from osrsge!")
+    print("Hello from osrs_ge!")

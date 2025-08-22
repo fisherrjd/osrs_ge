@@ -4,26 +4,8 @@ from streamlit_autorefresh import st_autorefresh
 from sqlmodel import Session, select, create_engine
 from aggregator.models.item_model import Item
 
-# Auto-refresh every 60 seconds
 REFRESH_INTERVAL = 60
 st_autorefresh(interval=REFRESH_INTERVAL * 1000, key="db_refresh")
-st.components.v1.html(
-    f"""
-<div id='countdown' style='font-size:1.2em; font-weight:bold;'>Refreshing in {REFRESH_INTERVAL} seconds...</div>
-<script>
-var seconds = {REFRESH_INTERVAL};
-var countdown = document.getElementById('countdown');
-setInterval(function() {{
-    seconds--;
-    if (seconds <= 0) {{
-        seconds = {REFRESH_INTERVAL};
-    }}
-    countdown.innerHTML = 'Refreshing in ' + seconds + ' seconds...';
-}}, 1000);
-</script>
-""",
-    height=40,
-)
 
 engine = create_engine("sqlite:///mydb.sqlite3")
 

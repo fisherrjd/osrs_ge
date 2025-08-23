@@ -24,6 +24,8 @@ let
     scripts = pkgs.lib.attrsets.attrValues scripts;
   };
 
+  repo = "$(${pkgs.git}/bin/git rev-parse --show-toplevel)";
+
   scripts = with pkgs; {
     db = pkgs.pog {
       name = "db";
@@ -40,7 +42,9 @@ in
 (env.overrideAttrs (_: {
   inherit name;
   NIXUP = "0.0.9";
-  PYTHONPATH = ".";
-} // uvEnv.uvEnvVars)) // {
-  inherit scripts;
-}
+  shellHook = ''
+    repo="${repo}"
+    export PYTHONPATH="$repo:$PYTHONPATH"
+    ln -sf ${uvEnv}/lib/python*/site-packages .direnv/site
+  '';
+} // uvEnv.uvEnvVars)) // { inherit scripts; }

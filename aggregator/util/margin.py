@@ -11,7 +11,6 @@ def ge_margin(high_price: int, low_price: int) -> int:
             tax: Coins lost to GE tax when selling
             profit: Net profit per item
     """
-
     # Calculate tax on the high price
     tax = min(high_price // 100, 5_000_000)
 

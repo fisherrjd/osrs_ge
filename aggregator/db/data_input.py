@@ -1,9 +1,10 @@
-from sqlmodel import SQLModel, create_engine, Session
 from aggregator.models.item_model import Item
 from aggregator.models.item_volume_5m import ItemSnapshot
+from datetime import datetime, timezone
+from sqlmodel import SQLModel, create_engine, Session
 import requests
 import time
-from datetime import datetime, timezone
+
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
 MAPPING_API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"

@@ -22,7 +22,7 @@ session = Session(engine)
 SQLModel.metadata.create_all(engine)
 
 
-def fetch_data(api_url):
+def fetch_data(api_url) -> dict:
     response = requests.get(api_url, headers=HEADERS)
     if response.status_code == 200:
         return response.json()
@@ -30,8 +30,28 @@ def fetch_data(api_url):
         raise Exception(f"Failed to fetch data: {response.status_code}")
 
 
-def fetch_all_data():
+# TODO make nice
+
+
+def mapping_wrapper():
+    pass
+
+
+def latest_wrapper():
+    pass
+
+
+def volume_wrapper():
+    pass
+
+
+def volume5m_wrapper():
+    pass
+
+
+def fetch_all_data() -> tuple[dict, dict, dict, dict]:
     """Fetch mapping, latest prices, and volume data from APIs."""
+    # TODO: Create data models and handle this nicely with their own methods
     mapping_data = fetch_data(MAPPING_API_URL)
     latest_data = fetch_data(LATEST_API_URL)
     volume_data = fetch_data(VOLUME_API_URL)

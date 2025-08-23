@@ -31,7 +31,7 @@ class Item(SQLModel, table=True):
     # ...existing code...
 
     @classmethod
-    def from_raw(cls, item_id, name_mapping, prices, volume_data, volume_5m_data=None):
+    def from_raw(cls, item_id, name_mapping, prices, volume_data):
         """
         Create an Item instance from raw API data.
         """

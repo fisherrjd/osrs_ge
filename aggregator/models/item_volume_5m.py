@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class ItemSnapshot(SQLModel, table=True):
+    __tablename__ = "itemsnapshot"
     id: int | None = Field(default=None, primary_key=True)
     item_id: int = Field(index=True)
     timestamp: datetime = Field(index=True)

@@ -3,7 +3,7 @@ from aggregator.models.item_model import Item
 from aggregator.models.item_volume_5m import ItemSnapshot
 import requests
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
 MAPPING_API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"
@@ -14,7 +14,7 @@ HEADERS = {
     "User-Agent": "@PapaBear#2007",
     "From": "dev@jade.rip",
 }
-DB_FILE = "sqlite:///mydb.sqlite3"
+DB_FILE = "sqlite:///item_data.db"
 
 engine = create_engine(DB_FILE)
 session = Session(engine)
@@ -41,33 +41,20 @@ def fetch_all_data():
 def update_database(latest_data, mapping_data, volume_data):
     """Update the database with the latest item data."""
 
-    def update_database_inner(latest_data, mapping_data, volume_data, volume_5m_data):
+    def update_database_inner(latest_data, mapping_data, volume_data):
         name_mapping = {
             str(item["id"]): item.get("name", "Unknown") for item in mapping_data
         }
         for item_id, prices in latest_data["data"].items():
-            item = Item.from_raw(
-                item_id, name_mapping, prices, volume_data, volume_5m_data
-            )
+            item = Item.from_raw(item_id, name_mapping, prices, volume_data)
             session.merge(item)
         session.commit()
 
     return update_database_inner
 
 
-def main():
-    """Main function to fetch data and save to the database every minute."""
-    try:
-        mapping_data, latest_data, volume_data, volume_5m_data = fetch_all_data()
-        update_database_inner = update_database(latest_data, mapping_data, volume_data)
-        update_database_inner(latest_data, mapping_data, volume_data, volume_5m_data)
-        print("Data saved successfully!")
-    except Exception as e:
-        print(f"Error: {e}")
-
-
 def ingest_api_data(api_json: dict):
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     with Session(engine) as session:
         for item_id, item_data in api_json["data"].items():
             high_vol = item_data.get("highPriceVolume", 0) or 0
@@ -93,7 +80,7 @@ if __name__ == "__main__":
     while True:
         mapping_data, latest_data, volume_data, volume_5m_data = fetch_all_data()
         update_database_inner = update_database(latest_data, mapping_data, volume_data)
-        update_database_inner(latest_data, mapping_data, volume_data, volume_5m_data)
+        update_database_inner(latest_data, mapping_data, volume_data)
         if run_count % 5 == 0:
             ingest_api_data(volume_5m_data)
             print("ItemVolume5m table updated!")

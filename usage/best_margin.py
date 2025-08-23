@@ -7,7 +7,7 @@ from aggregator.models.item_model import Item
 REFRESH_INTERVAL = 60
 st_autorefresh(interval=REFRESH_INTERVAL * 1000, key="db_refresh")
 
-engine = create_engine("sqlite:///mydb.sqlite3")
+engine = create_engine("sqlite:///item_data.db")
 
 st.title("OSRS Margin lookup")
 
@@ -21,6 +21,10 @@ def parse_num(val):
         return int(float(val[:-1]) * 1_000)
     elif val.endswith("m"):
         return int(float(val[:-1]) * 1_000_000)
+    elif val.endswith("b"):
+        return int(float(val[:-1]) * 1_000_000_000)
+    elif val.endswith("t"):
+        return int(float(val[:-1]) * 1_000_000_000_000)
     try:
         return int(val)
     except ValueError:
@@ -29,13 +33,13 @@ def parse_num(val):
 
 # User inputs
 low_price_op = st.selectbox("Low price operator", ["<", ">"])
-low_price_val = st.text_input("Low price value", value="100m")
+low_price_val = st.text_input("Low price value", value="100b")
 high_price_op = st.selectbox("High price operator", ["<", ">"])
-high_price_val = st.text_input("High price value", value="100m")
+high_price_val = st.text_input("High price value", value="100b")
 margin_op = st.selectbox("Margin operator", [">", "<"])
 margin_val = st.text_input("Margin value", value="100k")
 volume_op = st.selectbox("Volume operator", [">", "<"])
-volume_val = st.text_input("Volume value", value="100")
+volume_val = st.text_input("Volume value", value="0")
 
 # Get items from the database each refresh
 with Session(engine) as session:

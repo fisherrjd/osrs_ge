@@ -2,7 +2,7 @@ import streamlit as st
 from sqlmodel import Session, select, create_engine
 from aggregator.models.item_model import Item
 
-engine = create_engine("sqlite:///mydb.sqlite3")
+engine = create_engine("sqlite:///item_data.db")
 session = Session(engine)
 
 st.title("OSRS Item lookup")
@@ -15,7 +15,9 @@ search_text = st.text_input("Fuzzy search item name:")
 
 # Filter item names by search text (case-insensitive substring match)
 if search_text:
-    filtered_names = [name for name in item_names if search_text.lower() in name.lower()]
+    filtered_names = [
+        name for name in item_names if search_text.lower() in name.lower()
+    ]
 else:
     filtered_names = item_names
 

@@ -6,9 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "requests>=2.32.4",
- "sqlmodel>=0.0.24",
- "streamlit>=1.48.1",
- "streamlit-autorefresh>=1.0.1",
+    "sqlmodel>=0.0.24",
+    "streamlit>=1.48.1",
+    "streamlit-autorefresh>=1.0.1",
 ]
 
 

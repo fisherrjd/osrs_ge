@@ -20,8 +20,12 @@ class Item(SQLModel, table=True):
     value: int = Field(default=0)
     highalch: int = Field(default=0)
     icon: str = Field(default="")
-    high: int = Field(default=0)
-    highTime: int = Field(default=0)
-    low: int = Field(default=0)
-    lowTime: int = Field(default=0)
+    high: int | None = Field(default=None)
+    highTime: int | None = Field(default=None)
+    low: int | None = Field(default=None)
+    lowTime: int | None = Field(default=None)
     volume_24h: int = Field(default=0)
+
+    @property
+    def margin(self) -> int:
+        return ge_margin(self.high, self.low)

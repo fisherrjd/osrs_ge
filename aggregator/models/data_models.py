@@ -1,5 +1,6 @@
 from typing import Dict, Optional, List
 from pydantic import BaseModel
+from aggregator.util.averages import get_average_field
 
 
 class MappingData(BaseModel):
@@ -19,10 +20,10 @@ class MappingList(BaseModel):
 
 
 class ItemData(BaseModel):
-    high: Optional[int] = 0
-    highTime: Optional[int] = 0
-    low: Optional[int] = 0
-    lowTime: Optional[int] = 0
+    high: Optional[int] = None
+    highTime: Optional[int] = None
+    low: Optional[int] = None
+    lowTime: Optional[int] = None
 
 
 class LatestData(BaseModel):
@@ -43,5 +44,20 @@ class Volume5mItem(BaseModel):
 
 
 class Volume5m(BaseModel):
-
     data: Dict[str, Volume5mItem]
+
+    @property
+    def avg_high_price(self) -> Optional[float]:
+        return get_average_field(self, "avgHighPrice")
+
+    @property
+    def avg_high_volume(self) -> Optional[float]:
+        return get_average_field(self, "highPriceVolume")
+
+    @property
+    def avg_low_price(self) -> Optional[float]:
+        return get_average_field(self, "avgLowPrice")
+
+    @property
+    def avg_low_volume(self) -> Optional[float]:
+        return get_average_field(self, "lowPriceVolume")

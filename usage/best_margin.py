@@ -58,7 +58,7 @@ filtered_items = [
     if compare(item.low, low_price_op, parse_num(low_price_val))
     and compare(item.high, high_price_op, parse_num(high_price_val))
     and compare(item.margin, margin_op, parse_num(margin_val))
-    and compare(item.volume, volume_op, parse_num(volume_val))
+    and compare(item.volume_24h, volume_op, parse_num(volume_val))
 ]
 
 if filtered_items:
@@ -67,11 +67,11 @@ if filtered_items:
     df = pd.DataFrame(
         [
             {
-                "Name": item.item_name,
+                "Name": item.name,
                 "Low": item.low,
                 "High": item.high,
                 "Margin": item.margin,
-                "Volume": item.volume,
+                "Volume": item.volume_24h,
             }
             for item in filtered_items
         ]

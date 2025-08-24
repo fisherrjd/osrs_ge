@@ -24,7 +24,7 @@ else:
 selected_name = st.selectbox("Select item:", filtered_names)
 
 if selected_name:
-    statement = select(Item).where(Item.item_name == selected_name)
+    statement = select(Item).where(Item.name == selected_name)
     item = session.exec(statement).first()
     if item:
         st.write(item)

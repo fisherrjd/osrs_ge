@@ -1,8 +1,8 @@
 { pkgs ? import
     (fetchTarball {
-      name = "jpetrucciani-2025-08-15";
-      url = "https://github.com/jpetrucciani/nix/archive/62e6f6f1a1056ef49430dd1118bb602c59417d5c.tar.gz";
-      sha256 = "1sdcgcxy8id80z41ri16988yrhndam6nbq6d1rbr035wnlw3rwl1";
+      name = "jpetrucciani-2025-08-25";
+      url = "https://github.com/jpetrucciani/nix/archive/0fe412941d3150472f59923093594afd1eac9d8a.tar.gz";
+      sha256 = "0r319ri41zfmdvy6g9p5pdqwymvij7x0k56gvdikqn241c19hx5j";
     })
     { }
 }:
@@ -27,6 +27,7 @@ let
   repo = "$(${pkgs.git}/bin/git rev-parse --show-toplevel)";
 
   scripts = with pkgs; {
+    inherit (uvEnv.wrappers) black ruff ty;
     db = pkgs.pog {
       name = "db";
       script = ''
@@ -45,6 +46,6 @@ in
   shellHook = ''
     repo="${repo}"
     export PYTHONPATH="$repo:$PYTHONPATH"
-    ln -sf ${uvEnv}/lib/python*/site-packages .direnv/site
+    ln -sf ${uvEnv.uvEnvVars._UV_SITE} .direnv/site
   '';
 } // uvEnv.uvEnvVars)) // { inherit scripts; }

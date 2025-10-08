@@ -1,6 +1,5 @@
 from typing import Dict, Optional, List
 from pydantic import BaseModel
-from aggregator.util.averages import get_average_field
 
 
 class MappingData(BaseModel):
@@ -48,16 +47,20 @@ class Volume5m(BaseModel):
 
     @property
     def avg_high_price(self) -> Optional[float]:
-        return get_average_field(self, "avgHighPrice")
+        values = [item.avgHighPrice for item in self.data.values() if item.avgHighPrice is not None]
+        return sum(values) / len(values) if values else None
 
     @property
     def avg_high_volume(self) -> Optional[float]:
-        return get_average_field(self, "highPriceVolume")
+        values = [item.highPriceVolume for item in self.data.values() if item.highPriceVolume is not None]
+        return sum(values) / len(values) if values else None
 
     @property
     def avg_low_price(self) -> Optional[float]:
-        return get_average_field(self, "avgLowPrice")
+        values = [item.avgLowPrice for item in self.data.values() if item.avgLowPrice is not None]
+        return sum(values) / len(values) if values else None
 
     @property
     def avg_low_volume(self) -> Optional[float]:
-        return get_average_field(self, "lowPriceVolume")
+        values = [item.lowPriceVolume for item in self.data.values() if item.lowPriceVolume is not None]
+        return sum(values) / len(values) if values else None

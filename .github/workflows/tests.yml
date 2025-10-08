@@ -20,6 +20,9 @@ jobs:
     - name: Set up Python
       run: uv python install
 
+    - name: Install Apache Arrow
+      run: sudo apt-get update && sudo apt-get install -y libarrow-dev
+
     - name: Install dependencies
       run: uv sync
 

@@ -16,15 +16,28 @@ st.title("OSRS Margin lookup")
 def parse_num(val):
     if isinstance(val, (int, float)):
         return val
-    val = str(val).replace(",", "").strip().lower()
+    # This will raise AttributeError if val is None (when calling .replace())
+    val = val.replace(",", "").strip().lower()
     if val.endswith("k"):
-        return int(float(val[:-1]) * 1_000)
+        try:
+            return int(float(val[:-1]) * 1_000)
+        except ValueError:
+            return 0
     elif val.endswith("m"):
-        return int(float(val[:-1]) * 1_000_000)
+        try:
+            return int(float(val[:-1]) * 1_000_000)
+        except ValueError:
+            return 0
     elif val.endswith("b"):
-        return int(float(val[:-1]) * 1_000_000_000)
+        try:
+            return int(float(val[:-1]) * 1_000_000_000)
+        except ValueError:
+            return 0
     elif val.endswith("t"):
-        return int(float(val[:-1]) * 1_000_000_000_000)
+        try:
+            return int(float(val[:-1]) * 1_000_000_000_000)
+        except ValueError:
+            return 0
     try:
         return int(val)
     except ValueError:
@@ -45,9 +58,11 @@ volume_val = st.text_input("Volume value", value="0")
 with Session(engine) as session:
     all_items = session.exec(select(Item)).all()
 
-
 # Helper function for comparison
 def compare(val, op, ref):
+    """Compare val with ref using the given operator. Returns False if val is None."""
+    if val is None:
+        return False
     return val > ref if op == ">" else val < ref
 
 

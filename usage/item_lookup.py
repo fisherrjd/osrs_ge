@@ -1,5 +1,6 @@
 import streamlit as st
-from sqlmodel import Session, select, create_engine
+from sqlmodel import Session, create_engine, select
+
 from aggregator.models.item_model import Item
 
 engine = create_engine("sqlite:///item_data.db")
@@ -9,7 +10,7 @@ st.title("OSRS Item lookup")
 
 # Get all item names from the database
 all_items = session.exec(select(Item)).all()
-item_names = [item.item_name for item in all_items]
+item_names = [item.name for item in all_items]
 
 search_text = st.text_input("Fuzzy search item name:")
 

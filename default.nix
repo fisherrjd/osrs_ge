@@ -20,7 +20,7 @@ let
       jfmt
       nixup
     ];
-    db = [ duckdb];
+    db = [ duckdb ];
     uv = [ uv uvEnv ];
     scripts = pkgs.lib.attrsets.attrValues scripts;
   };
@@ -47,6 +47,7 @@ in
   shellHook = ''
     repo="${repo}"
     export PYTHONPATH="$repo:$PYTHONPATH"
+    export STREAMLIT_SERVER_ADDRESS=0.0.0.0
     ln -sf ${uvEnv.uvEnvVars._UV_SITE} .direnv/site
   '';
 } // uvEnv.uvEnvVars)) // { inherit scripts; }

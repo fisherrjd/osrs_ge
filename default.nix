@@ -1,8 +1,8 @@
 { pkgs ? import
     (fetchTarball {
-      name = "jpetrucciani-2025-08-25";
-      url = "https://github.com/jpetrucciani/nix/archive/0fe412941d3150472f59923093594afd1eac9d8a.tar.gz";
-      sha256 = "0r319ri41zfmdvy6g9p5pdqwymvij7x0k56gvdikqn241c19hx5j";
+      name = "jpetrucciani-2025-11-26";
+      url = "https://github.com/jpetrucciani/nix/archive/e2f539f2a618c4b07bc9f45efb71c8038f779f05.tar.gz";
+      sha256 = "0m48y4gsqm0vfx0v1yglsm8fb6zw8y0d711q5mzqc3pqxmlliyr4";
     })
     { }
 }:
@@ -20,6 +20,7 @@ let
       jfmt
       nixup
     ];
+    db = [ duckdb];
     uv = [ uv uvEnv ];
     scripts = pkgs.lib.attrsets.attrValues scripts;
   };

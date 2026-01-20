@@ -14,6 +14,6 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    allowedHosts: ['eldo'],
+    allowedHosts: ['eldo', 'ge.jade.rip'],
   },
 })

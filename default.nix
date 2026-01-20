@@ -37,8 +37,8 @@ let
       '';
     };
 
-    restart = pkgs.pog {
-      name = "restart";
+    __restart_api = pkgs.pog {
+      name = "__restart_api";
       script = ''
         ${pkgs.podman}/bin/podman pod rm -f osrs_ge-api
         ${pkgs.podman}/bin/podman play kube pod.yaml

@@ -25,7 +25,7 @@ def get_items(
     session: Annotated[Session, Depends(get_session)],
     # Pagination parameters
     skip: Annotated[int, Query(ge=0, description="Number of items to skip")] = 0,
-    limit: Annotated[int, Query(ge=1, le=100, description="Max items to return")] = 50,
+    limit: Annotated[int, Query(ge=1, le=100, description="Max items to return")] = 25,
     # Filter parameters
     members: Annotated[
         bool | None, Query(description="Filter by members status")

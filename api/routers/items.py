@@ -22,47 +22,38 @@ def get_session():
 @router.get("")
 def get_items(
     # Pagination parameters
-    skip: Annotated[int, Query(default=0, ge=0, description="Number of items to skip")],
-    limit: Annotated[
-        int, Query(default=50, ge=1, le=100, description="Max items to return")
-    ],
+    skip: Annotated[int, Query(ge=0, description="Number of items to skip")] = 0,
+    limit: Annotated[int, Query(ge=1, le=100, description="Max items to return")] = 50,
     # Filter parameters
     members: Annotated[
-        bool | None, Query(default=None, description="Filter by members status")
-    ],
+        bool | None, Query(description="Filter by members status")
+    ] = None,
     min_volume: Annotated[
-        int | None, Query(default=None, ge=0, description="Minimum 24h volume")
-    ],
+        int | None, Query(ge=0, description="Minimum 24h volume")
+    ] = None,
     max_volume: Annotated[
-        int | None, Query(default=None, ge=0, description="Maximum 24h volume")
-    ],
+        int | None, Query(ge=0, description="Maximum 24h volume")
+    ] = None,
     min_price: Annotated[
-        int | None, Query(default=None, ge=0, description="Minimum high price")
-    ],
-    max_price: Annotated[
-        int | None, Query(default=None, description="Maximum high price")
-    ],
+        int | None, Query(ge=0, description="Minimum high price")
+    ] = None,
+    max_price: Annotated[int | None, Query(description="Maximum high price")] = None,
     min_margin: Annotated[
-        int | None,
-        Query(default=None, description="Minimum margin (profit after GE tax)"),
-    ],
+        int | None, Query(description="Minimum margin (profit after GE tax)")
+    ] = None,
     max_margin: Annotated[
-        int | None,
-        Query(default=None, description="Maximum margin (profit after GE tax)"),
-    ],
+        int | None, Query(description="Maximum margin (profit after GE tax)")
+    ] = None,
     name: Annotated[
-        str | None,
-        Query(default=None, description="Search by name (case-insensitive)"),
-    ],
+        str | None, Query(description="Search by name (case-insensitive)")
+    ] = None,
     # Sorting
-    sort_by: Annotated[
-        str, Query(default="volume_24h", description="Field to sort by")
-    ],
+    sort_by: Annotated[str, Query(description="Field to sort by")] = "volume_24h",
     sort_order: Annotated[
-        str, Query(default="desc", pattern="^(asc|desc)$", description="Sort order")
-    ],
+        str, Query(pattern="^(asc|desc)$", description="Sort order")
+    ] = "desc",
     # Database session
-    session: Annotated[Session, Depends(get_session)],
+    session: Annotated[Session, Depends(get_session)] = Depends(get_session),
 ):
     """
     Get items with pagination and filtering.

@@ -14,6 +14,7 @@ from api.schemas.data_models import (
 )
 from api.schemas.item_model import Item
 from api.schemas.item_volume_5m import ItemSnapshot
+from api.util.margin import ge_margin
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
 MAPPING_API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"
@@ -86,6 +87,12 @@ def update_database(latest_data, mapping_data, volume_data):
             if not mapping_info:
                 continue  # skip items not in mapping
             volume_info = volume_dict.get(str(item_id), 0)
+
+            # Calculate margin
+            high_price = prices.high or 0
+            low_price = prices.low or 0
+            margin = ge_margin(high_price, low_price)
+
             # Create Item object (adjust fields as needed)
             item = Item(
                 id=item_id,
@@ -102,6 +109,7 @@ def update_database(latest_data, mapping_data, volume_data):
                 low=prices.low,
                 lowTime=prices.lowTime,
                 volume_24h=volume_info,
+                margin=margin,
             )
             session.merge(item)
         session.commit()

@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from api.util.margin import ge_margin
 from sqlmodel import Field, SQLModel
+
+from api.util.margin import ge_margin
 
 
 # --- Helper functions ---
@@ -26,7 +27,4 @@ class Item(SQLModel, table=True):
     low: int | None = Field(default=None)
     lowTime: int | None = Field(default=None)
     volume_24h: int = Field(default=0)
-
-    @property
-    def margin(self) -> int:
-        return ge_margin(self.high, self.low)
+    margin: int = Field(default=0)

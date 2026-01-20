@@ -38,6 +38,12 @@ def get_items(
         default=None, ge=0, description="Minimum high price"
     ),
     max_price: Optional[int] = Query(default=None, description="Maximum high price"),
+    min_margin: Optional[int] = Query(
+        default=None, description="Minimum margin (profit after GE tax)"
+    ),
+    max_margin: Optional[int] = Query(
+        default=None, description="Maximum margin (profit after GE tax)"
+    ),
     name: Optional[str] = Query(
         default=None, description="Search by name (case-insensitive)"
     ),
@@ -77,6 +83,12 @@ def get_items(
 
     if max_price is not None:
         query = query.where(Item.high <= max_price)
+
+    if min_margin is not None:
+        query = query.where(Item.margin >= min_margin)
+
+    if max_margin is not None:
+        query = query.where(Item.margin <= max_margin)
 
     if name is not None:
         # Case-insensitive search using LIKE

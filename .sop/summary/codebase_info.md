@@ -12,13 +12,13 @@ A real-time Old School RuneScape (OSRS) Grand Exchange price tracking and margin
 ## Statistics
 - **Total Lines of Code:** ~412 Python LOC
 - **Total Python Files:** 16
-- **Primary Packages:** 2 (aggregator, usage)
+- **Primary Packages:** 2 (backend, usage)
 - **Test Coverage:** Test structure exists (source files not in repo)
 
 ## Repository Structure
 ```
 osrs_ge/
-├── aggregator/          # Core data collection and models
+├── backend/          # Core data collection and models
 │   ├── db/             # Database operations and API fetching
 │   ├── models/         # SQLModel and Pydantic data models
 │   └── util/           # Utility functions

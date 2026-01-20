@@ -51,7 +51,7 @@ Search for specific items with fuzzy matching and view complete market details.
 
 3. **Start data collection**
    ```bash
-   python -m aggregator.db.data_input
+   python -m backend.db.item_data
    ```
 
    This will start fetching market data every 60 seconds. Leave this running in the background.
@@ -70,7 +70,7 @@ Search for specific items with fuzzy matching and view complete market details.
 The data collection service continuously fetches market data from the RuneScape Wiki API:
 
 ```bash
-python -m aggregator.db.data_input
+python -m backend.db.item_data
 ```
 
 **What it does:**
@@ -178,9 +178,9 @@ graph TB
 
 ```
 osrs_ge/
-├── aggregator/              # Core data collection and models
+├── backend/              # Core data collection and models
 │   ├── db/                 # Database operations
-│   │   └── data_input.py   # Main data ingestion script
+│   │   └── item_data.py   # Main data ingestion script
 │   ├── models/             # Data models (Pydantic + SQLModel)
 │   │   ├── data_models.py  # API response models
 │   │   ├── item_model.py   # Item database table
@@ -215,18 +215,18 @@ direnv allow
 
 **Formatting:**
 ```bash
-black aggregator/ usage/
+black backend/ usage/
 ```
 
 **Linting:**
 ```bash
-ruff check aggregator/ usage/
-ruff format aggregator/ usage/
+ruff check backend/ usage/
+ruff format backend/ usage/
 ```
 
 **Type Checking:**
 ```bash
-ty check aggregator/ usage/
+ty check backend/ usage/
 ```
 
 ### Running Tests

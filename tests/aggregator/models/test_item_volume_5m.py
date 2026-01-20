@@ -1,6 +1,8 @@
-import pytest
 from datetime import datetime, timezone
-from aggregator.models.item_volume_5m import ItemSnapshot
+
+import pytest
+
+from backend.models.item_volume_5m import ItemSnapshot
 
 
 class TestItemSnapshot:

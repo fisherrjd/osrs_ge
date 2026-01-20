@@ -1,8 +1,8 @@
 import streamlit as st
+from sqlmodel import Session, create_engine, select
 from streamlit_autorefresh import st_autorefresh
 
-from sqlmodel import Session, select, create_engine
-from aggregator.models.item_model import Item
+from backend.models.item_model import Item
 
 REFRESH_INTERVAL = 60
 st_autorefresh(interval=REFRESH_INTERVAL * 1000, key="db_refresh")
@@ -57,6 +57,7 @@ volume_val = st.text_input("Volume value", value="0")
 # Get items from the database each refresh
 with Session(engine) as session:
     all_items = session.exec(select(Item)).all()
+
 
 # Helper function for comparison
 def compare(val, op, ref):

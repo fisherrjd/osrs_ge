@@ -1,5 +1,6 @@
 import pytest
-from aggregator.util.margin import ge_margin
+
+from backend.util.margin import ge_margin
 
 
 class TestGEMargin:

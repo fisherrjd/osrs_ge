@@ -1,7 +1,8 @@
 """Shared pytest fixtures and configuration for the test suite."""
 
 import pytest
-from aggregator.models.data_models import Volume5mItem, Volume5m
+
+from backend.models.data_models import Volume5m, Volume5mItem
 
 
 @pytest.fixture
@@ -18,13 +19,22 @@ def sample_volume_5m_data():
     return Volume5m(
         data={
             "1": Volume5mItem(
-                avgHighPrice=100, highPriceVolume=1000, avgLowPrice=90, lowPriceVolume=1200
+                avgHighPrice=100,
+                highPriceVolume=1000,
+                avgLowPrice=90,
+                lowPriceVolume=1200,
             ),
             "2": Volume5mItem(
-                avgHighPrice=200, highPriceVolume=2000, avgLowPrice=180, lowPriceVolume=2400
+                avgHighPrice=200,
+                highPriceVolume=2000,
+                avgLowPrice=180,
+                lowPriceVolume=2400,
             ),
             "3": Volume5mItem(
-                avgHighPrice=300, highPriceVolume=3000, avgLowPrice=270, lowPriceVolume=3600
+                avgHighPrice=300,
+                highPriceVolume=3000,
+                avgLowPrice=270,
+                lowPriceVolume=3600,
             ),
         }
     )

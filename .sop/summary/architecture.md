@@ -12,7 +12,7 @@ graph TB
     end
 
     subgraph "Data Collection Layer"
-        DI[data_input.py]
+        DI[item_data.py]
         FD[fetch_data]
     end
 
@@ -55,7 +55,7 @@ graph TB
 ### 1. Data Collection Layer
 **Purpose:** Fetch and validate external API data
 **Components:**
-- `aggregator.db.data_input` - Main data ingestion orchestrator
+- `backend.db.item_data` - Main data ingestion orchestrator
 - API wrapper functions for each endpoint
 - Request handling with custom headers
 
@@ -175,7 +175,7 @@ sequenceDiagram
 
 ### 4. Extensibility
 - New Streamlit apps easily added to `usage/` directory
-- Modular utility functions in `aggregator/util/`
+- Modular utility functions in `backend/util/`
 - Flexible filtering with operator-based comparisons
 
 ## Scalability Considerations

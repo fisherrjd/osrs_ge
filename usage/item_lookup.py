@@ -1,7 +1,7 @@
 import streamlit as st
 from sqlmodel import Session, create_engine, select
 
-from aggregator.models.item_model import Item
+from backend.models.item_model import Item
 
 engine = create_engine("sqlite:///item_data.db")
 session = Session(engine)

@@ -216,7 +216,7 @@ recent = session.exec(statement).all()
 
 #### Margin Calculator
 ```python
-from aggregator.util.margin import ge_margin
+from backend.util.margin import ge_margin
 
 # Calculate profit after GE tax
 profit = ge_margin(high_price=185, low_price=184)
@@ -259,7 +259,7 @@ profit = ge_margin(high_price=1_000_000_000, low_price=900_000_000)
 ### API → Database Flow
 ```mermaid
 sequenceDiagram
-    participant App as data_input.py
+    participant App as item_data.py
     participant API as RuneScape Wiki API
     participant Pydantic as Validation Layer
     participant DB as SQLite Database
@@ -323,7 +323,7 @@ No environment variables currently used. Configuration is hardcoded in modules:
 
 **Database Location:**
 ```python
-# aggregator/db/data_input.py
+# backend/db/item_data.py
 DB_FILE = "sqlite:///item_data.db"
 
 # usage/*.py
@@ -338,7 +338,7 @@ DB_FILE = os.getenv("DATABASE_URL", "sqlite:///item_data.db")
 
 ### API Configuration
 ```python
-# aggregator/db/data_input.py
+# backend/db/item_data.py
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
 MAPPING_API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"
 VOLUME_API_URL = "https://prices.runescape.wiki/api/v1/osrs/volumes"

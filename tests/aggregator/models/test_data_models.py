@@ -1,12 +1,13 @@
 import pytest
-from aggregator.models.data_models import (
-    MappingData,
-    MappingList,
+
+from backend.models.data_models import (
     ItemData,
     LatestData,
-    Volume24h,
-    Volume5mItem,
+    MappingData,
+    MappingList,
     Volume5m,
+    Volume5mItem,
+    Volume24h,
 )
 
 
@@ -311,7 +312,10 @@ class TestVolume5m:
         data = Volume5m(
             data={
                 "554": Volume5mItem(  # Fire rune
-                    avgHighPrice=5, highPriceVolume=10000, avgLowPrice=4, lowPriceVolume=12000
+                    avgHighPrice=5,
+                    highPriceVolume=10000,
+                    avgLowPrice=4,
+                    lowPriceVolume=12000,
                 ),
                 "1215": Volume5mItem(  # Dragon dagger
                     avgHighPrice=17000,

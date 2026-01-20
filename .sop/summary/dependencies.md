@@ -213,7 +213,7 @@ st_autorefresh(interval=REFRESH_INTERVAL * 1000, key="db_refresh")
 
 **Invocation:**
 ```bash
-black aggregator/ usage/
+black backend/ usage/
 ```
 
 ---
@@ -243,8 +243,8 @@ lint.ignore = [
 
 **Invocation:**
 ```bash
-ruff check aggregator/ usage/
-ruff format aggregator/ usage/
+ruff check backend/ usage/
+ruff format backend/ usage/
 ```
 
 ---
@@ -265,7 +265,7 @@ extra-paths = [".direnv/site"]
 
 **Invocation:**
 ```bash
-ty check aggregator/ usage/
+ty check backend/ usage/
 ```
 
 ---
@@ -287,10 +287,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-include = ["aggregator"]
+include = ["backend"]
 
 [tool.hatch.build.targets.wheel]
-include = ["aggregator"]
+include = ["backend"]
 ```
 
 ---
@@ -395,7 +395,7 @@ include = ["aggregator"]
 **nixup** - Nix updater
 
 **Custom Scripts:**
-- `db` - Runs data ingestion: `python -m aggregator.db.data_input`
+- `db` - Runs data ingestion: `python -m backend.db.item_data`
 - `black`, `ruff`, `ty` - Wrapped with proper environment
 
 ---

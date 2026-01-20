@@ -1,5 +1,6 @@
 import pytest
-from aggregator.models.item_model import Item, safe_int
+
+from backend.models.item_model import Item, safe_int
 
 
 class TestSafeInt:

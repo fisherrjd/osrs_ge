@@ -45,7 +45,7 @@
 **Key Metadata:**
 - Language: Python 3.13+
 - Total LOC: ~412
-- Main packages: aggregator, usage
+- Main packages: backend, usage
 - Database: SQLite
 
 ---
@@ -95,7 +95,7 @@
 - Planning refactoring
 
 **Major Components:**
-- `data_input.py` - Data ingestion orchestrator
+- `item_data.py` - Data ingestion orchestrator
 - Data models (Pydantic + SQLModel)
 - Utility functions (margin calculation)
 - Web applications (best_margin, item_lookup, spike detection)
@@ -256,9 +256,9 @@ graph TB
 
 ### Source Code
 ```
-aggregator/
+backend/
 ├── db/
-│   └── data_input.py        # Main data ingestion (147 lines)
+│   └── item_data.py        # Main data ingestion (147 lines)
 ├── models/
 │   ├── data_models.py       # Pydantic models (67 lines)
 │   ├── item_model.py        # Item table (32 lines)
@@ -320,7 +320,7 @@ default.nix                  # Nix development environment
 ### Adding New API Endpoints
 1. **Review:** interfaces.md (existing API patterns)
 2. **Define:** Pydantic model for response
-3. **Create:** Wrapper function in data_input.py
+3. **Create:** Wrapper function in item_data.py
 4. **Integrate:** Into fetch_all_data() flow
 
 ### Optimizing Performance
@@ -334,7 +334,7 @@ default.nix                  # Nix development environment
 ## Frequently Asked Questions
 
 ### How often is data updated?
-**Answer in:** workflows.md, components.md (data_input.py)
+**Answer in:** workflows.md, components.md (item_data.py)
 - Price data: Every 60 seconds
 - Volume snapshots: Every 5 minutes (every 5th run)
 

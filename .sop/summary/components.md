@@ -4,7 +4,7 @@
 
 ```mermaid
 graph LR
-    subgraph Aggregator Package
+    subgraph backend Package
         DB[Database Module]
         Models[Models Module]
         Util[Utilities Module]
@@ -27,7 +27,7 @@ graph LR
 
 ## Core Components
 
-### 1. aggregator.db.data_input
+### 1. backend.db.item_data
 **Purpose:** Central data ingestion and database update orchestrator
 
 **Responsibilities:**
@@ -70,7 +70,7 @@ DB_FILE = "sqlite:///item_data.db"
 
 ---
 
-### 2. aggregator.models
+### 2. backend.models
 **Purpose:** Define data structures for API responses and database tables
 
 #### 2.1 data_models.py (Pydantic Models)
@@ -147,7 +147,7 @@ DB_FILE = "sqlite:///item_data.db"
 
 ---
 
-### 3. aggregator.util.margin
+### 3. backend.util.margin
 **Purpose:** Calculate Grand Exchange profit margins with tax
 
 **Function:** `ge_margin(high_price, low_price) -> int`
@@ -242,7 +242,7 @@ profit = (high_price - tax) - low_price
 ### Data Flow Between Components
 ```mermaid
 flowchart TD
-    A[data_input Main Loop] --> B[fetch_all_data]
+    A[item_data Main Loop] --> B[fetch_all_data]
     B --> C[API Wrappers]
     C --> D[Pydantic Models]
     D --> E[update_database]
@@ -262,7 +262,7 @@ flowchart TD
 ### Dependency Graph
 ```mermaid
 graph TD
-    DataInput[data_input.py] --> DataModels[data_models.py]
+    DataInput[item_data.py] --> DataModels[data_models.py]
     DataInput --> ItemModel[item_model.py]
     DataInput --> ItemVolume[item_volume_5m.py]
     DataInput --> Requests[requests library]
@@ -282,12 +282,12 @@ graph TD
 
 ## Testing Structure
 Based on compiled test artifacts in `tests/` directory:
-- `tests/aggregator/db/test_data_input` - Data ingestion tests
-- `tests/aggregator/models/test_data_models` - Pydantic model tests
-- `tests/aggregator/models/test_item_model` - Item table tests
-- `tests/aggregator/models/test_item_volume_5m` - Snapshot table tests
-- `tests/aggregator/util/test_averages` - Average calculation tests
-- `tests/aggregator/util/test_margin` - Margin calculation tests
+- `tests/backend/db/test_item_data` - Data ingestion tests
+- `tests/backend/models/test_data_models` - Pydantic model tests
+- `tests/backend/models/test_item_model` - Item table tests
+- `tests/backend/models/test_item_volume_5m` - Snapshot table tests
+- `tests/backend/util/test_averages` - Average calculation tests
+- `tests/backend/util/test_margin` - Margin calculation tests
 - `tests/usage/test_best_margin` - Best margin app tests
 - `tests/usage/test_item_lookup` - Item lookup app tests
 

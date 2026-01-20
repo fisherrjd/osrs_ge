@@ -35,7 +35,7 @@ Transform the existing OSRS GE data aggregation system into a "stock portfolio" 
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  SQLite Database          │  Background Services                 │
-│  - item (existing)        │  - Data Aggregator (existing 60s)   │
+│  - item (existing)        │  - Data backend (existing 60s)   │
 │  - itemsnapshot (existing)│  - Alert Processor (future)         │
 │  - portfolio (new)        │                                      │
 │  - portfolio_holding (new)│                                      │
@@ -128,7 +128,7 @@ CREATE INDEX idx_alert_active ON alert(is_active);
 ### SQLModel Definitions
 
 ```python
-# aggregator/models/portfolio_models.py
+# backend/models/portfolio_models.py
 
 from datetime import datetime
 from typing import Optional
@@ -711,7 +711,7 @@ api/
     ├── portfolio_service.py
     └── pnl_calculator.py
 
-aggregator/models/
+backend/models/
 └── portfolio_models.py  # New SQLModel definitions
 ```
 
@@ -727,8 +727,8 @@ frontend/                # Entire new Vue.js project
 | File | Changes |
 |------|---------|
 | `pyproject.toml` | Add FastAPI, uvicorn, httpx dependencies |
-| `aggregator/models/item_model.py` | Add relationships for portfolio joins |
-| `aggregator/models/__init__.py` | Export new portfolio models |
+| `backend/models/item_model.py` | Add relationships for portfolio joins |
+| `backend/models/__init__.py` | Export new portfolio models |
 
 ---
 

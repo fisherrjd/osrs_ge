@@ -24,7 +24,7 @@ const membersFilter = ref<'all' | 'members' | 'f2p'>('all')
 
 // Pagination states
 const currentPage = ref(0)
-const itemsPerPage = 50
+const itemsPerPage = 15
 
 function formatGold(value: number | null): string {
   if (value === null) return '-'

@@ -45,7 +45,7 @@
 **Key Metadata:**
 - Language: Python 3.13+
 - Total LOC: ~412
-- Main packages: backend, usage
+- Main packages: api, usage
 - Database: SQLite
 
 ---
@@ -256,7 +256,7 @@ graph TB
 
 ### Source Code
 ```
-backend/
+api/
 ├── db/
 │   └── item_data.py        # Main data ingestion (147 lines)
 ├── models/

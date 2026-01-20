@@ -213,7 +213,7 @@ st_autorefresh(interval=REFRESH_INTERVAL * 1000, key="db_refresh")
 
 **Invocation:**
 ```bash
-black backend/ usage/
+black api/ usage/
 ```
 
 ---
@@ -243,8 +243,8 @@ lint.ignore = [
 
 **Invocation:**
 ```bash
-ruff check backend/ usage/
-ruff format backend/ usage/
+ruff check api/ usage/
+ruff format api/ usage/
 ```
 
 ---
@@ -265,7 +265,7 @@ extra-paths = [".direnv/site"]
 
 **Invocation:**
 ```bash
-ty check backend/ usage/
+ty check api/ usage/
 ```
 
 ---
@@ -273,7 +273,7 @@ ty check backend/ usage/
 ## Build System
 
 ### hatchling
-**Purpose:** Modern Python build backend
+**Purpose:** Modern Python build api
 
 **Usage in Project:**
 - Package building
@@ -284,13 +284,13 @@ ty check backend/ usage/
 ```toml
 [build-system]
 requires = ["hatchling"]
-build-backend = "hatchling.build"
+build-api = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-include = ["backend"]
+include = ["api"]
 
 [tool.hatch.build.targets.wheel]
-include = ["backend"]
+include = ["api"]
 ```
 
 ---
@@ -395,7 +395,7 @@ include = ["backend"]
 **nixup** - Nix updater
 
 **Custom Scripts:**
-- `db` - Runs data ingestion: `python -m backend.db.item_data`
+- `db` - Runs data ingestion: `python -m api.db.item_data`
 - `black`, `ruff`, `ty` - Wrapped with proper environment
 
 ---
@@ -419,7 +419,7 @@ include = ["backend"]
 
 **Development:** Minimum versions for tooling
 
-**Build:** Exact backend (hatchling)
+**Build:** Exact api (hatchling)
 
 ---
 

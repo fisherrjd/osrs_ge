@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
 
 import pytest
-
-from backend.models.item_volume_5m import ItemSnapshot
+from api.models.item_volume_5m import ItemSnapshot
 
 
 class TestItemSnapshot:

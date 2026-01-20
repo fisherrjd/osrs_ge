@@ -17,14 +17,14 @@ dependencies = [
 dev = ["black>=25.1.0", "ruff>=0.12.10", "ty>=0.0.1a19", "pytest>=8.3.4", "pytest-cov>=6.0.0"]
 
 [tool.hatch.build.targets.sdist]
-include = ["backend"]
+include = ["api"]
 
 [tool.hatch.build.targets.wheel]
-include = ["backend"]
+include = ["api"]
 
 [build-system]
 requires = ["hatchling"]
-build-backend = "hatchling.build"
+build-api = "hatchling.build"
 
 [tool.ruff]
 line-length = 88
@@ -93,7 +93,7 @@ addopts = [
     "-v",
     "--strict-markers",
     "--tb=short",
-    "--cov=backend",
+    "--cov=api",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]

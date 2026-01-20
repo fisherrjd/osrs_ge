@@ -74,7 +74,7 @@ classDiagram
 ### MappingData
 **Purpose:** Represents item metadata from the mapping API
 
-**Module:** `backend.models.data_models`
+**Module:** `api.models.data_models`
 
 **Fields:**
 ```python
@@ -105,7 +105,7 @@ mapping_data = MappingData(**api_response)
 ### MappingList
 **Purpose:** Container for multiple MappingData objects
 
-**Module:** `backend.models.data_models`
+**Module:** `api.models.data_models`
 
 **Fields:**
 ```python
@@ -124,7 +124,7 @@ mapping_list = MappingList(items=[MappingData(**item) for item in data])
 ### ItemData
 **Purpose:** Represents current price data for a single item
 
-**Module:** `backend.models.data_models`
+**Module:** `api.models.data_models`
 
 **Fields:**
 ```python
@@ -150,7 +150,7 @@ item_data = ItemData(**api_response["data"]["2"])
 ### LatestData
 **Purpose:** Container for all items' current prices
 
-**Module:** `backend.models.data_models`
+**Module:** `api.models.data_models`
 
 **Fields:**
 ```python
@@ -170,7 +170,7 @@ for item_id, prices in latest.data.items():
 ### Volume24h
 **Purpose:** Container for 24-hour trading volumes
 
-**Module:** `backend.models.data_models`
+**Module:** `api.models.data_models`
 
 **Fields:**
 ```python
@@ -195,7 +195,7 @@ volume = volumes.data.get(str(item_id), 0)
 ### Volume5mItem
 **Purpose:** Represents 5-minute interval volume and price data
 
-**Module:** `backend.models.data_models`
+**Module:** `api.models.data_models`
 
 **Fields:**
 ```python
@@ -216,7 +216,7 @@ item_5m = Volume5mItem(**api_response["data"]["2"])
 ### Volume5m
 **Purpose:** Container for all items' 5-minute data with computed properties
 
-**Module:** `backend.models.data_models`
+**Module:** `api.models.data_models`
 
 **Fields:**
 ```python
@@ -263,7 +263,7 @@ item_data = volume_5m.data[str(item_id)]
 ### Item
 **Purpose:** Main table storing current item information and prices
 
-**Module:** `backend.models.item_model`
+**Module:** `api.models.item_model`
 
 **Table Name:** `item` (auto-generated)
 
@@ -338,7 +338,7 @@ print(f"Margin: {item.margin} coins")
 ### ItemSnapshot
 **Purpose:** Time-series table for historical 5-minute volume data
 
-**Module:** `backend.models.item_volume_5m`
+**Module:** `api.models.item_volume_5m`
 
 **Table Name:** `itemsnapshot` (explicitly set)
 

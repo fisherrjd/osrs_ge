@@ -1,6 +1,5 @@
 import pytest
-
-from backend.models.item_model import Item, safe_int
+from api.models.item_model import Item, safe_int
 
 
 class TestSafeInt:

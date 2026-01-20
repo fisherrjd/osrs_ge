@@ -60,7 +60,7 @@ item_names = [item.name for item in all_items]  # CORRECT
 **Locations:** Multiple files
 
 **Issue:** Database path hardcoded in multiple locations:
-- `backend/db/item_data.py:25` → `"sqlite:///item_data.db"`
+- `api/db/item_data.py:25` → `"sqlite:///item_data.db"`
 - `usage/best_margin.py:10` → `"sqlite:///item_data.db"`
 - `usage/item_lookup.py:6` → `"sqlite:///item_data.db"`
 - `usage/sell_spike.py:8` → `"sqlite:///item_data.db"`
@@ -69,7 +69,7 @@ item_names = [item.name for item in all_items]  # CORRECT
 **Priority:** Medium
 **Recommendation:** Create shared configuration module:
 ```python
-# backend/config.py
+# api/config.py
 import os
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///item_data.db")
 ```
@@ -77,7 +77,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///item_data.db")
 ---
 
 #### 3. Timezone Handling
-**Location:** `backend/db/item_data.py`
+**Location:** `api/db/item_data.py`
 
 **Issue:** Inconsistent timezone usage:
 - ItemSnapshot timestamps use `datetime.now(timezone.utc)` ✅
@@ -197,7 +197,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///item_data.db")
 **Impact:** Difficult to deploy in different environments
 **Priority:** Medium
 **Recommendations:**
-- Create `backend/config.py` for centralized config
+- Create `api/config.py` for centralized config
 - Support environment variables via `python-dotenv`
 - Document configuration options
 - Provide example `.env.example` file
@@ -284,7 +284,7 @@ data_latest = session.exec(select(Item)).all()          # Correct
 ```
 
 ### 3. Missing Null Checks (Medium)
-**File:** `backend/models/item_model.py:31`
+**File:** `api/models/item_model.py:31`
 **Bug:** `ge_margin()` called with potentially None values
 ```python
 @property

@@ -1,6 +1,5 @@
 import pytest
-
-from backend.models.data_models import (
+from api.models.data_models import (
     ItemData,
     LatestData,
     MappingData,

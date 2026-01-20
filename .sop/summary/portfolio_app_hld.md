@@ -7,7 +7,7 @@ Transform the existing OSRS GE data aggregation system into a "stock portfolio" 
 ### Design Decisions
 - **User Scope**: Single user initially, architected for future multi-user support
 - **MVP Focus**: Portfolio management + TradingView charts
-- **Real-time Strategy**: Polling every 30-60 seconds (matches backend 60s refresh)
+- **Real-time Strategy**: Polling every 30-60 seconds (matches api 60s refresh)
 - **Phase 2 Features**: Watchlists, alerts, multi-user auth
 
 ---
@@ -28,14 +28,14 @@ Transform the existing OSRS GE data aggregation system into a "stock portfolio" 
                               │ HTTP/REST
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      FastAPI Backend                             │
+│                      FastAPI api                             │
 │  /api/items  │  /api/portfolio  │  /api/watchlist  │  /api/alerts│
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  SQLite Database          │  Background Services                 │
-│  - item (existing)        │  - Data backend (existing 60s)   │
+│  - item (existing)        │  - Data api (existing 60s)   │
 │  - itemsnapshot (existing)│  - Alert Processor (future)         │
 │  - portfolio (new)        │                                      │
 │  - portfolio_holding (new)│                                      │
@@ -128,7 +128,7 @@ CREATE INDEX idx_alert_active ON alert(is_active);
 ### SQLModel Definitions
 
 ```python
-# backend/models/portfolio_models.py
+# api/models/portfolio_models.py
 
 from datetime import datetime
 from typing import Optional
@@ -615,7 +615,7 @@ async def get_item_history(
 
 ## Technology Stack
 
-### Backend (extend existing)
+### api (extend existing)
 
 | Component | Technology | Version |
 |-----------|------------|---------|
@@ -688,7 +688,7 @@ dependencies = [
 
 ## Files to Create
 
-### Backend
+### api
 ```
 api/
 ├── __init__.py
@@ -711,7 +711,7 @@ api/
     ├── portfolio_service.py
     └── pnl_calculator.py
 
-backend/models/
+api/models/
 └── portfolio_models.py  # New SQLModel definitions
 ```
 
@@ -727,8 +727,8 @@ frontend/                # Entire new Vue.js project
 | File | Changes |
 |------|---------|
 | `pyproject.toml` | Add FastAPI, uvicorn, httpx dependencies |
-| `backend/models/item_model.py` | Add relationships for portfolio joins |
-| `backend/models/__init__.py` | Export new portfolio models |
+| `api/models/item_model.py` | Add relationships for portfolio joins |
+| `api/models/__init__.py` | Export new portfolio models |
 
 ---
 
@@ -784,7 +784,7 @@ frontend/                # Entire new Vue.js project
 1. **API Testing**: Run `pytest tests/api/` for endpoint tests
 2. **Frontend Dev**: `cd frontend && pnpm dev` - verify UI at localhost:5173
 3. **Integration**:
-   - Start backend: `uvicorn api.main:app --reload`
+   - Start api: `uvicorn api.main:app --reload`
    - Start frontend: `pnpm dev`
    - Test portfolio creation, adding holdings, viewing charts
 4. **E2E Flow**: Create portfolio -> Add item -> View P&L -> Check chart

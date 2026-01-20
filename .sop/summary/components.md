@@ -4,7 +4,7 @@
 
 ```mermaid
 graph LR
-    subgraph backend Package
+    subgraph api Package
         DB[Database Module]
         Models[Models Module]
         Util[Utilities Module]
@@ -27,7 +27,7 @@ graph LR
 
 ## Core Components
 
-### 1. backend.db.item_data
+### 1. api.db.item_data
 **Purpose:** Central data ingestion and database update orchestrator
 
 **Responsibilities:**
@@ -70,7 +70,7 @@ DB_FILE = "sqlite:///item_data.db"
 
 ---
 
-### 2. backend.models
+### 2. api.models
 **Purpose:** Define data structures for API responses and database tables
 
 #### 2.1 data_models.py (Pydantic Models)
@@ -147,7 +147,7 @@ DB_FILE = "sqlite:///item_data.db"
 
 ---
 
-### 3. backend.util.margin
+### 3. api.util.margin
 **Purpose:** Calculate Grand Exchange profit margins with tax
 
 **Function:** `ge_margin(high_price, low_price) -> int`
@@ -282,12 +282,12 @@ graph TD
 
 ## Testing Structure
 Based on compiled test artifacts in `tests/` directory:
-- `tests/backend/db/test_item_data` - Data ingestion tests
-- `tests/backend/models/test_data_models` - Pydantic model tests
-- `tests/backend/models/test_item_model` - Item table tests
-- `tests/backend/models/test_item_volume_5m` - Snapshot table tests
-- `tests/backend/util/test_averages` - Average calculation tests
-- `tests/backend/util/test_margin` - Margin calculation tests
+- `tests/api/db/test_item_data` - Data ingestion tests
+- `tests/api/models/test_data_models` - Pydantic model tests
+- `tests/api/models/test_item_model` - Item table tests
+- `tests/api/models/test_item_volume_5m` - Snapshot table tests
+- `tests/api/util/test_averages` - Average calculation tests
+- `tests/api/util/test_margin` - Margin calculation tests
 - `tests/usage/test_best_margin` - Best margin app tests
 - `tests/usage/test_item_lookup` - Item lookup app tests
 

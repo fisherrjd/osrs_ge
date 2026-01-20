@@ -2,17 +2,16 @@ import time
 from datetime import datetime, timezone
 
 import requests
-from sqlmodel import Session, SQLModel, create_engine
-
-from backend.models.data_models import (
+from api.models.data_models import (
     LatestData,
     MappingData,
     MappingList,
     Volume5m,
     Volume24h,
 )
-from backend.models.item_model import Item
-from backend.models.item_volume_5m import ItemSnapshot
+from api.models.item_model import Item
+from api.models.item_volume_5m import ItemSnapshot
+from sqlmodel import Session, SQLModel, create_engine
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
 MAPPING_API_URL = "https://prices.runescape.wiki/api/v1/osrs/mapping"

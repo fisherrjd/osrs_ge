@@ -33,7 +33,7 @@ let
     db = pkgs.pog {
       name = "db";
       script = ''
-        ${uvEnv}/bin/python -m backend.db.item_data
+        ${uvEnv}/bin/python -m api.db.item_data
       '';
     };
   };

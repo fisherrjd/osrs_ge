@@ -55,7 +55,7 @@ graph TB
 ### 1. Data Collection Layer
 **Purpose:** Fetch and validate external API data
 **Components:**
-- `backend.db.item_data` - Main data ingestion orchestrator
+- `api.db.item_data` - Main data ingestion orchestrator
 - API wrapper functions for each endpoint
 - Request handling with custom headers
 
@@ -175,7 +175,7 @@ sequenceDiagram
 
 ### 4. Extensibility
 - New Streamlit apps easily added to `usage/` directory
-- Modular utility functions in `backend/util/`
+- Modular utility functions in `api/util/`
 - Flexible filtering with operator-based comparisons
 
 ## Scalability Considerations

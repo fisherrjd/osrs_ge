@@ -8,7 +8,7 @@
 
 **Frequency:** Every 60 seconds (5-minute intervals for snapshots)
 
-**Entry Point:** `python -m backend.db.item_data`
+**Entry Point:** `python -m api.db.item_data`
 
 ```mermaid
 flowchart TD
@@ -431,7 +431,7 @@ flowchart TD
 **Step 1: Start Data Collection**
 ```bash
 # Terminal 1
-python -m backend.db.item_data
+python -m api.db.item_data
 # Or with Nix:
 db
 ```

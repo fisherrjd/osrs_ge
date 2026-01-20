@@ -1,10 +1,9 @@
 # low price = insta sell
 
 import streamlit as st
+from api.models.item_model import Item
+from api.models.item_volume_5m import ItemSnapshot
 from sqlmodel import Session, create_engine, select
-
-from backend.models.item_model import Item
-from backend.models.item_volume_5m import ItemSnapshot
 
 engine = create_engine("sqlite:///item_data.db")
 session = Session(engine)

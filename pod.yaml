@@ -8,6 +8,7 @@ spec:
   containers:
     - name: api
       image: ghcr.io/fisherrjd/osrs_ge-api:latest
+      imagePullPolicy: Always
       ports:
         - containerPort: 8000
           hostPort: 8000
@@ -20,6 +21,7 @@ spec:
 
     - name: data-fetcher
       image: ghcr.io/fisherrjd/osrs_ge-fetcher:latest
+      imagePullPolicy: Always
       env:
         - name: DB_FILE
           value: 'sqlite:////data/item_data.db'

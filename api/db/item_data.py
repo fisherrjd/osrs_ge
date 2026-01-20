@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime, timezone
 
@@ -23,7 +24,7 @@ HEADERS = {
     "User-Agent": "@PapaBear#2007",
     "From": "dev@jade.rip",
 }
-DB_FILE = "sqlite:///item_data.db"
+DB_FILE = os.getenv("DB_FILE", "sqlite:///item_data.db")
 
 engine = create_engine(DB_FILE)
 session = Session(engine)

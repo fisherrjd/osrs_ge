@@ -20,11 +20,16 @@ const hasMore = ref(false)
 // Filter states
 const searchQuery = ref('')
 const minMargin = ref<number | ''>('')
+const minVolume = ref<number | ''>('')
 const membersFilter = ref<'all' | 'members' | 'f2p'>('all')
 
 // Pagination states
 const currentPage = ref(0)
 const itemsPerPage = 15
+
+// Sorting states
+const sortBy = ref('volume_24h')
+const sortOrder = ref<'asc' | 'desc'>('desc')
 
 function formatGold(value: number | null): string {
   if (value === null) return '-'
@@ -47,6 +52,8 @@ async function fetchItems() {
     const params = new URLSearchParams()
     params.append('skip', String(currentPage.value * itemsPerPage))
     params.append('limit', String(itemsPerPage))
+    params.append('sort_by', sortBy.value)
+    params.append('sort_order', sortOrder.value)
 
     if (searchQuery.value) {
       params.append('name', searchQuery.value)
@@ -54,6 +61,10 @@ async function fetchItems() {
 
     if (minMargin.value !== '') {
       params.append('min_margin', String(minMargin.value))
+    }
+
+    if (minVolume.value !== '') {
+      params.append('min_volume', String(minVolume.value))
     }
 
     if (membersFilter.value !== 'all') {
@@ -89,6 +100,7 @@ function previousPage() {
 function resetFilters() {
   searchQuery.value = ''
   minMargin.value = ''
+  minVolume.value = ''
   membersFilter.value = 'all'
   currentPage.value = 0
 }
@@ -98,8 +110,24 @@ function applyFilters() {
   fetchItems()
 }
 
+function toggleSort(column: string) {
+  if (sortBy.value === column) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = column
+    sortOrder.value = 'desc'
+  }
+  currentPage.value = 0
+  fetchItems()
+}
+
+function getSortIcon(column: string): string {
+  if (sortBy.value !== column) return '↕'
+  return sortOrder.value === 'asc' ? '↑' : '↓'
+}
+
 // Watch for filter changes and apply them
-watch([searchQuery, minMargin, membersFilter], () => {
+watch([searchQuery, minMargin, minVolume, membersFilter], () => {
   applyFilters()
 })
 
@@ -127,6 +155,11 @@ fetchItems()
             placeholder="e.g. 100000"
             class="w-full"
           />
+        </div>
+
+        <div class="w-[180px]">
+          <label class="text-sm font-medium mb-2 block">Min Volume (24h)</label>
+          <Input v-model.number="minVolume" type="number" placeholder="e.g. 1000" class="w-full" />
         </div>
 
         <div class="w-[180px]">
@@ -160,10 +193,27 @@ fetchItems()
       <TableHeader>
         <TableRow>
           <TableHead>Item</TableHead>
-          <TableHead class="text-right">Buy Price</TableHead>
-          <TableHead class="text-right">Sell Price</TableHead>
-          <TableHead class="text-right">Margin</TableHead>
-          <TableHead class="text-right">Volume (24h)</TableHead>
+          <TableHead
+            class="text-right cursor-pointer hover:bg-muted/50"
+            @click="toggleSort('high')"
+          >
+            Buy Price {{ getSortIcon('high') }}
+          </TableHead>
+          <TableHead class="text-right cursor-pointer hover:bg-muted/50" @click="toggleSort('low')">
+            Sell Price {{ getSortIcon('low') }}
+          </TableHead>
+          <TableHead
+            class="text-right cursor-pointer hover:bg-muted/50"
+            @click="toggleSort('margin')"
+          >
+            Margin {{ getSortIcon('margin') }}
+          </TableHead>
+          <TableHead
+            class="text-right cursor-pointer hover:bg-muted/50"
+            @click="toggleSort('volume_24h')"
+          >
+            Volume (24h) {{ getSortIcon('volume_24h') }}
+          </TableHead>
           <TableHead class="text-right">Buy Limit</TableHead>
         </TableRow>
       </TableHeader>

@@ -12,7 +12,7 @@ def ge_margin(high_price: int, low_price: int) -> int:
             profit: Net profit per item
     """
     # Calculate tax on the high price
-    tax = min(high_price // 100, 5_000_000)
+    tax = min(high_price // 50, 5_000_000)
 
     # Net profit per item
     profit = (high_price - tax) - low_price

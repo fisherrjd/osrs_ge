@@ -1,5 +1,5 @@
-import pytest
-from api.models.data_models import (
+api.schemasimport pytest
+from api.schemas.data_models import (
     ItemData,
     LatestData,
     MappingData,

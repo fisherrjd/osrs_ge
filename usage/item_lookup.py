@@ -1,6 +1,7 @@
 import streamlit as st
-from api.models.item_model import Item
 from sqlmodel import Session, create_engine, select
+
+from api.schemas.item_model import Item
 
 engine = create_engine("sqlite:///item_data.db")
 session = Session(engine)

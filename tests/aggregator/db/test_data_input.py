@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+
 from api.db.item_data import (
     fetch_all_data,
     fetch_data,
@@ -12,7 +13,7 @@ from api.db.item_data import (
     volume5m_wrapper,
     volume_wrapper,
 )
-from api.models.data_models import (
+from api.schemas.data_models import (
     ItemData,
     LatestData,
     MappingData,
@@ -21,8 +22,8 @@ from api.models.data_models import (
     Volume5mItem,
     Volume24h,
 )
-from api.models.item_model import Item
-from api.models.item_volume_5m import ItemSnapshot
+from api.schemas.item_model import Item
+from api.schemas.item_volume_5m import ItemSnapshot
 
 
 class TestFetchData:

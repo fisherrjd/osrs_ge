@@ -70,7 +70,7 @@ DB_FILE = "sqlite:///item_data.db"
 
 ---
 
-### 2. api.models
+### 2. api.schemas
 **Purpose:** Define data structures for API responses and database tables
 
 #### 2.1 data_models.py (Pydantic Models)

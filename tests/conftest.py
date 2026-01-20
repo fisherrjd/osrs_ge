@@ -1,7 +1,8 @@
 """Shared pytest fixtures and configuration for the test suite."""
 
 import pytest
-from api.models.data_models import Volume5m, Volume5mItem
+
+from api.schemas.data_models import Volume5m, Volume5mItem
 
 
 @pytest.fixture

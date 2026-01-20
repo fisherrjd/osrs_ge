@@ -1,7 +1,8 @@
 import streamlit as st
-from api.models.item_model import Item
 from sqlmodel import Session, create_engine, select
 from streamlit_autorefresh import st_autorefresh
+
+from api.schemas.item_model import Item
 
 REFRESH_INTERVAL = 60
 st_autorefresh(interval=REFRESH_INTERVAL * 1000, key="db_refresh")

@@ -1,5 +1,5 @@
-import pytest
-from api.models.item_model import Item, safe_int
+api.schemasapi.schemasimport pytest
+from api.schemas.item_model import Item, safe_int
 
 
 class TestSafeInt:

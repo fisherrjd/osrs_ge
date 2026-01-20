@@ -21,6 +21,7 @@ let
       nixup
     ];
     db = [ duckdb ];
+    bun = [ bun ];
     uv = [ uv uvEnv ];
     scripts = pkgs.lib.attrsets.attrValues scripts;
   };

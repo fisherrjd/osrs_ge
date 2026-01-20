@@ -36,6 +36,14 @@ let
         ${uvEnv}/bin/python -m api.db.item_data
       '';
     };
+
+    restart = pkgs.pog {
+      name = "restart";
+      script = ''
+        ${pkgs.podman}/bin/podman pod rm -f osrs_ge-api
+        ${pkgs.podman}/bin/podman play kube pod.yaml
+      '';
+    };
   };
   paths = pkgs.lib.flatten [ (builtins.attrValues tools) ];
   env = pkgs.buildEnv {

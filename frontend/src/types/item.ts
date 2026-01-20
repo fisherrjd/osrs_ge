@@ -3,6 +3,7 @@
 export interface Item {
   id: number
   name: string
+  examine: string
   icon_url: string
   members: boolean
   lowalch: number

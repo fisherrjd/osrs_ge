@@ -143,147 +143,193 @@ fetchItems()
 </script>
 
 <template>
-  <div class="container mx-auto py-8">
-    <h1 class="text-2xl font-bold mb-6">OSRS Grand Exchange</h1>
-
-    <!-- Filters -->
-    <div class="mb-6 space-y-4">
-      <div class="flex gap-4 flex-wrap">
-        <div class="flex-1 min-w-[200px]">
-          <label class="text-sm font-medium mb-2 block">Search Items</label>
-          <Input v-model="searchQuery" placeholder="Search by name..." class="w-full" />
-        </div>
-
-        <div class="w-[180px]">
-          <label class="text-sm font-medium mb-2 block">Min Margin (GP)</label>
-          <Input
-            v-model.number="minMargin"
-            type="number"
-            placeholder="e.g. 100000"
-            class="w-full"
-          />
-        </div>
-
-        <div class="w-[180px]">
-          <label class="text-sm font-medium mb-2 block">Min Volume (24h)</label>
-          <Input v-model.number="minVolume" type="number" placeholder="e.g. 1000" class="w-full" />
-        </div>
-
-        <div class="w-[180px]">
-          <label class="text-sm font-medium mb-2 block">Membership</label>
-          <select
-            v-model="membersFilter"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+  <div class="min-h-screen">
+    <!-- Header with green accent border -->
+    <header class="border-b-4 border-accent bg-card mb-6">
+      <div class="container mx-auto py-4 px-4">
+        <h1 class="text-2xl font-bold flex items-center gap-3">
+          <span class="text-primary">Varlamore Terminal</span>
+          <span
+            class="text-xs font-semibold px-2 py-1 rounded bg-secondary text-secondary-foreground"
+            >VT</span
           >
-            <option value="all">All Items</option>
-            <option value="members">Members Only</option>
-            <option value="f2p">F2P Only</option>
-          </select>
+        </h1>
+      </div>
+    </header>
+
+    <div class="container mx-auto px-4 pb-8">
+      <!-- Filters -->
+      <div class="mb-6 space-y-4 p-4 bg-card rounded-lg border border-border">
+        <div class="flex gap-4 flex-wrap">
+          <div class="flex-1 min-w-[200px]">
+            <label class="text-sm font-medium mb-2 block text-secondary">Search Items</label>
+            <Input v-model="searchQuery" placeholder="Search by name..." class="w-full" />
+          </div>
+
+          <div class="w-[180px]">
+            <label class="text-sm font-medium mb-2 block text-secondary">Min Margin (GP)</label>
+            <Input
+              v-model.number="minMargin"
+              type="number"
+              placeholder="e.g. 100000"
+              class="w-full"
+            />
+          </div>
+
+          <div class="w-[180px]">
+            <label class="text-sm font-medium mb-2 block text-secondary">Min Volume (24h)</label>
+            <Input
+              v-model.number="minVolume"
+              type="number"
+              placeholder="e.g. 1000"
+              class="w-full"
+            />
+          </div>
+
+          <div class="w-[180px]">
+            <label class="text-sm font-medium mb-2 block text-secondary">Membership</label>
+            <select
+              v-model="membersFilter"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            >
+              <option value="all">All Items</option>
+              <option value="members">Members Only</option>
+              <option value="f2p">F2P Only</option>
+            </select>
+          </div>
+
+          <div class="w-[180px]">
+            <label class="text-sm font-medium mb-2 block text-secondary">Max Time Ago</label>
+            <select
+              v-model.number="maxTimeAgo"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            >
+              <option value="">Any time</option>
+              <option :value="5">5 minutes</option>
+              <option :value="15">15 minutes</option>
+              <option :value="30">30 minutes</option>
+              <option :value="60">1 hour</option>
+              <option :value="180">3 hours</option>
+              <option :value="360">6 hours</option>
+              <option :value="720">12 hours</option>
+              <option :value="1440">24 hours</option>
+            </select>
+          </div>
+
+          <div class="flex items-end">
+            <Button
+              @click="resetFilters"
+              variant="outline"
+              class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+              >Reset</Button
+            >
+          </div>
         </div>
 
-        <div class="w-[180px]">
-          <label class="text-sm font-medium mb-2 block">Max Time Ago</label>
-          <select
-            v-model.number="maxTimeAgo"
-            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        <div class="text-sm text-muted-foreground">
+          Showing
+          <span class="text-secondary font-medium"
+            >{{ currentPage * itemsPerPage + 1 }}-{{
+              Math.min((currentPage + 1) * itemsPerPage, total)
+            }}</span
           >
-            <option value="">Any time</option>
-            <option :value="5">5 minutes</option>
-            <option :value="15">15 minutes</option>
-            <option :value="30">30 minutes</option>
-            <option :value="60">1 hour</option>
-            <option :value="180">3 hours</option>
-            <option :value="360">6 hours</option>
-            <option :value="720">12 hours</option>
-            <option :value="1440">24 hours</option>
-          </select>
-        </div>
-
-        <div class="flex items-end">
-          <Button @click="resetFilters" variant="outline">Reset</Button>
+          of <span class="text-secondary font-medium">{{ total.toLocaleString() }}</span> items
         </div>
       </div>
 
-      <div class="text-sm text-muted-foreground">
-        Showing {{ currentPage * itemsPerPage + 1 }}-{{
-          Math.min((currentPage + 1) * itemsPerPage, total)
-        }}
-        of {{ total.toLocaleString() }} items
-      </div>
-    </div>
+      <div v-if="loading" class="text-center py-8 text-secondary">Loading...</div>
 
-    <div v-if="loading" class="text-center py-8">Loading...</div>
-
-    <Table v-else>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Item</TableHead>
-          <TableHead
-            class="text-right cursor-pointer hover:bg-muted/50"
-            @click="toggleSort('high')"
-          >
-            Buy Price {{ getSortIcon('high') }}
-          </TableHead>
-          <TableHead class="text-right">Buy Time</TableHead>
-          <TableHead class="text-right cursor-pointer hover:bg-muted/50" @click="toggleSort('low')">
-            Sell Price {{ getSortIcon('low') }}
-          </TableHead>
-          <TableHead class="text-right">Sell Time</TableHead>
-          <TableHead
-            class="text-right cursor-pointer hover:bg-muted/50"
-            @click="toggleSort('margin')"
-          >
-            Margin {{ getSortIcon('margin') }}
-          </TableHead>
-          <TableHead
-            class="text-right cursor-pointer hover:bg-muted/50"
-            @click="toggleSort('volume_24h')"
-          >
-            Volume (24h) {{ getSortIcon('volume_24h') }}
-          </TableHead>
-          <TableHead class="text-right">Buy Limit</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow v-for="item in items" :key="item.id">
-          <TableCell class="font-medium">
-            <div class="flex items-center gap-3">
-              <img :src="getIconUrl(item.icon)" :alt="item.name" class="w-8 h-8" />
-              <span>{{ item.name }}</span>
-              <img
-                :src="getMembershipIcon(item.members)"
-                :alt="item.members ? 'Members' : 'Free-to-play'"
-                class="w-4 h-4"
-                :title="item.members ? 'Members only' : 'Free-to-play'"
-              />
-            </div>
-          </TableCell>
-          <TableCell class="text-right">{{ formatGold(item.high) }}</TableCell>
-          <TableCell class="text-right text-muted-foreground text-sm">{{
-            formatRelativeTime(item.highTime)
-          }}</TableCell>
-          <TableCell class="text-right">{{ formatGold(item.low) }}</TableCell>
-          <TableCell class="text-right text-muted-foreground text-sm">{{
-            formatRelativeTime(item.lowTime)
-          }}</TableCell>
-          <TableCell class="text-right">{{ formatGold(item.margin) }}</TableCell>
-          <TableCell class="text-right">{{ item.volume_24h.toLocaleString() }}</TableCell>
-          <TableCell class="text-right">{{ item.limit || '-' }}</TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-
-    <!-- Pagination -->
-    <div class="mt-6 flex items-center justify-between">
-      <Button @click="previousPage" :disabled="currentPage === 0 || loading" variant="outline">
-        Previous
-      </Button>
-
-      <div class="text-sm text-muted-foreground">
-        Page {{ currentPage + 1 }} of {{ Math.ceil(total / itemsPerPage) }}
+      <div v-else class="bg-card rounded-lg border border-border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow class="bg-accent/10 hover:bg-accent/10">
+              <TableHead class="text-accent font-semibold">Item</TableHead>
+              <TableHead
+                class="text-right cursor-pointer hover:bg-accent/20 text-accent font-semibold"
+                @click="toggleSort('high')"
+              >
+                Buy Price {{ getSortIcon('high') }}
+              </TableHead>
+              <TableHead class="text-right text-accent font-semibold">Buy Time</TableHead>
+              <TableHead
+                class="text-right cursor-pointer hover:bg-accent/20 text-accent font-semibold"
+                @click="toggleSort('low')"
+              >
+                Sell Price {{ getSortIcon('low') }}
+              </TableHead>
+              <TableHead class="text-right text-accent font-semibold">Sell Time</TableHead>
+              <TableHead
+                class="text-right cursor-pointer hover:bg-accent/20 text-accent font-semibold"
+                @click="toggleSort('margin')"
+              >
+                Margin {{ getSortIcon('margin') }}
+              </TableHead>
+              <TableHead
+                class="text-right cursor-pointer hover:bg-accent/20 text-accent font-semibold"
+                @click="toggleSort('volume_24h')"
+              >
+                Volume (24h) {{ getSortIcon('volume_24h') }}
+              </TableHead>
+              <TableHead class="text-right text-accent font-semibold">Buy Limit</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="item in items" :key="item.id" class="hover:bg-accent/5">
+              <TableCell class="font-medium">
+                <div class="flex items-center gap-3">
+                  <img :src="getIconUrl(item.icon)" :alt="item.name" class="w-8 h-8" />
+                  <span>{{ item.name }}</span>
+                  <img
+                    :src="getMembershipIcon(item.members)"
+                    :alt="item.members ? 'Members' : 'Free-to-play'"
+                    class="w-4 h-4"
+                    :title="item.members ? 'Members only' : 'Free-to-play'"
+                  />
+                </div>
+              </TableCell>
+              <TableCell class="text-right text-secondary">{{ formatGold(item.high) }}</TableCell>
+              <TableCell class="text-right text-muted-foreground text-sm">{{
+                formatRelativeTime(item.highTime)
+              }}</TableCell>
+              <TableCell class="text-right text-secondary">{{ formatGold(item.low) }}</TableCell>
+              <TableCell class="text-right text-muted-foreground text-sm">{{
+                formatRelativeTime(item.lowTime)
+              }}</TableCell>
+              <TableCell class="text-right font-medium text-secondary">{{
+                formatGold(item.margin)
+              }}</TableCell>
+              <TableCell class="text-right">{{ item.volume_24h.toLocaleString() }}</TableCell>
+              <TableCell class="text-right">{{ item.limit || '-' }}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
 
-      <Button @click="nextPage" :disabled="!hasMore || loading" variant="outline"> Next </Button>
+      <!-- Pagination -->
+      <div class="mt-6 flex items-center justify-between">
+        <Button
+          @click="previousPage"
+          :disabled="currentPage === 0 || loading"
+          variant="outline"
+          class="border-accent text-accent hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+        >
+          Previous
+        </Button>
+
+        <div class="text-sm text-muted-foreground">
+          Page <span class="text-secondary font-medium">{{ currentPage + 1 }}</span> of
+          <span class="text-secondary font-medium">{{ Math.ceil(total / itemsPerPage) }}</span>
+        </div>
+
+        <Button
+          @click="nextPage"
+          :disabled="!hasMore || loading"
+          variant="outline"
+          class="border-accent text-accent hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+        >
+          Next
+        </Button>
+      </div>
     </div>
   </div>
 </template>

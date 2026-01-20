@@ -1,3 +1,4 @@
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
@@ -49,6 +50,9 @@ def get_items(
     name: Annotated[
         str | None, Query(description="Search by name (case-insensitive)")
     ] = None,
+    max_time_ago: Annotated[
+        int | None, Query(ge=0, description="Maximum minutes ago for price data")
+    ] = None,
     # Sorting
     sort_by: Annotated[str, Query(description="Field to sort by")] = "volume_24h",
     sort_order: Annotated[
@@ -92,6 +96,23 @@ def get_items(
     if name is not None:
         # Case-insensitive search using LIKE
         query = query.where(col(Item.name).ilike(f"%{name}%"))
+
+    if max_time_ago is not None:
+        # Filter by timestamp - only show items updated within the last N minutes
+        # Convert minutes to seconds and calculate cutoff timestamp
+        cutoff_timestamp = int(time.time()) - (max_time_ago * 60)
+        # Item must have either highTime or lowTime within the time window
+        # Also check that the timestamp is not NULL
+        query = query.where(
+            (
+                (col(Item.highTime).is_not(None))
+                & (col(Item.highTime) >= cutoff_timestamp)
+            )
+            | (
+                (col(Item.lowTime).is_not(None))
+                & (col(Item.lowTime) >= cutoff_timestamp)
+            )
+        )
 
     # Get total count (before pagination)
     count_query = select(func.count()).select_from(query.subquery())

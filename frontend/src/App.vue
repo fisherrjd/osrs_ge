@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { formatRelativeTime } from '@/lib/utils'
 
 const items = ref<Item[]>([])
 const loading = ref(true)
@@ -22,6 +23,7 @@ const searchQuery = ref('')
 const minMargin = ref<number | ''>('')
 const minVolume = ref<number | ''>('')
 const membersFilter = ref<'all' | 'members' | 'f2p'>('all')
+const maxTimeAgo = ref<number | ''>('')
 
 // Pagination states
 const currentPage = ref(0)
@@ -71,6 +73,10 @@ async function fetchItems() {
       params.append('members', String(membersFilter.value === 'members'))
     }
 
+    if (maxTimeAgo.value !== '') {
+      params.append('max_time_ago', String(maxTimeAgo.value))
+    }
+
     const response = await fetch(`https://osrs.jade.rip/api/items?${params}`)
     const data = await response.json()
     items.value = data.items
@@ -102,6 +108,7 @@ function resetFilters() {
   minMargin.value = ''
   minVolume.value = ''
   membersFilter.value = 'all'
+  maxTimeAgo.value = ''
   currentPage.value = 0
 }
 
@@ -127,7 +134,7 @@ function getSortIcon(column: string): string {
 }
 
 // Watch for filter changes and apply them
-watch([searchQuery, minMargin, minVolume, membersFilter], () => {
+watch([searchQuery, minMargin, minVolume, membersFilter, maxTimeAgo], () => {
   applyFilters()
 })
 
@@ -174,6 +181,24 @@ fetchItems()
           </select>
         </div>
 
+        <div class="w-[180px]">
+          <label class="text-sm font-medium mb-2 block">Max Time Ago</label>
+          <select
+            v-model.number="maxTimeAgo"
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <option value="">Any time</option>
+            <option :value="5">5 minutes</option>
+            <option :value="15">15 minutes</option>
+            <option :value="30">30 minutes</option>
+            <option :value="60">1 hour</option>
+            <option :value="180">3 hours</option>
+            <option :value="360">6 hours</option>
+            <option :value="720">12 hours</option>
+            <option :value="1440">24 hours</option>
+          </select>
+        </div>
+
         <div class="flex items-end">
           <Button @click="resetFilters" variant="outline">Reset</Button>
         </div>
@@ -199,9 +224,11 @@ fetchItems()
           >
             Buy Price {{ getSortIcon('high') }}
           </TableHead>
+          <TableHead class="text-right">Buy Time</TableHead>
           <TableHead class="text-right cursor-pointer hover:bg-muted/50" @click="toggleSort('low')">
             Sell Price {{ getSortIcon('low') }}
           </TableHead>
+          <TableHead class="text-right">Sell Time</TableHead>
           <TableHead
             class="text-right cursor-pointer hover:bg-muted/50"
             @click="toggleSort('margin')"
@@ -232,7 +259,13 @@ fetchItems()
             </div>
           </TableCell>
           <TableCell class="text-right">{{ formatGold(item.high) }}</TableCell>
+          <TableCell class="text-right text-muted-foreground text-sm">{{
+            formatRelativeTime(item.highTime)
+          }}</TableCell>
           <TableCell class="text-right">{{ formatGold(item.low) }}</TableCell>
+          <TableCell class="text-right text-muted-foreground text-sm">{{
+            formatRelativeTime(item.lowTime)
+          }}</TableCell>
           <TableCell class="text-right">{{ formatGold(item.margin) }}</TableCell>
           <TableCell class="text-right">{{ item.volume_24h.toLocaleString() }}</TableCell>
           <TableCell class="text-right">{{ item.limit || '-' }}</TableCell>

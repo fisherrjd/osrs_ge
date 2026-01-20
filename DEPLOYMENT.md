@@ -20,7 +20,7 @@ Both containers share a mounted SQLite database volume.
 
 ```bash
 sudo mkdir -p /var/lib/osrs-ge/data
-sudo chown $USER:$USER /var/lib/osrs-ge/data
+sudo chown $USER:$(id -gn) /var/lib/osrs-ge/data
 # Optional: Copy existing item_data.db if you have one
 # cp item_data.db /var/lib/osrs-ge/data/
 ```
@@ -31,8 +31,8 @@ The pod is pre-configured to use `/var/lib/osrs-ge/data` for database storage.
 
 ```bash
 # Pull the latest images
-podman pull ghcr.io/fisherrjd/osrs-ge-api:latest
-podman pull ghcr.io/fisherrjd/osrs-ge-fetcher:latest
+podman pull ghcr.io/fisherrjd/osrs_ge-api:latest
+podman pull ghcr.io/fisherrjd/osrs_ge-fetcher:latest
 
 # Create and start the pod
 podman play kube pod.yaml
@@ -45,8 +45,8 @@ podman play kube pod.yaml
 podman pod ps
 
 # Check container logs
-podman logs osrs-ge-api-api
-podman logs osrs-ge-api-data-fetcher
+podman logs osrs_ge-api-api
+podman logs osrs_ge-api-data-fetcher
 
 # Test the API
 curl http://localhost:8000/health
@@ -57,37 +57,37 @@ curl http://localhost:8000/api/items
 
 ### Stop the pod
 ```bash
-podman pod stop osrs-ge-api
+podman pod stop osrs_ge-api
 ```
 
 ### Start the pod
 ```bash
-podman pod start osrs-ge-api
+podman pod start osrs_ge-api
 ```
 
 ### Remove the pod
 ```bash
-podman pod rm -f osrs-ge-api
+podman pod rm -f osrs_ge-api
 ```
 
 ### Update to latest images
 ```bash
 # Pull new images
-podman pull ghcr.io/fisherrjd/osrs-ge-api:latest
-podman pull ghcr.io/fisherrjd/osrs-ge-fetcher:latest
+podman pull ghcr.io/fisherrjd/osrs_ge-api:latest
+podman pull ghcr.io/fisherrjd/osrs_ge-fetcher:latest
 
 # Recreate the pod
-podman pod rm -f osrs-ge-api
+podman pod rm -f osrs_ge-api
 podman play kube pod.yaml
 ```
 
 ### View logs
 ```bash
 # Follow API logs
-podman logs -f osrs-ge-api-api
+podman logs -f osrs_ge-api-api
 
 # Follow data fetcher logs
-podman logs -f osrs-ge-api-data-fetcher
+podman logs -f osrs_ge-api-data-fetcher
 ```
 
 ## NixOS Integration
@@ -101,7 +101,7 @@ For NixOS, you can integrate this into your configuration. Example snippet:
     dockerCompat = true;
   };
 
-  systemd.services.osrs-ge-api = {
+  systemd.services.osrs_ge-api = {
     description = "OSRS GE API Pod";
     after = [ "network.target" "podman.service" ];
     requires = [ "podman.service" ];
@@ -111,11 +111,11 @@ For NixOS, you can integrate this into your configuration. Example snippet:
       Type = "oneshot";
       RemainAfterExit = "yes";
       ExecStartPre = [
-        "${pkgs.podman}/bin/podman pull ghcr.io/fisherrjd/osrs-ge-api:latest"
-        "${pkgs.podman}/bin/podman pull ghcr.io/fisherrjd/osrs-ge-fetcher:latest"
+        "${pkgs.podman}/bin/podman pull ghcr.io/fisherrjd/osrs_ge-api:latest"
+        "${pkgs.podman}/bin/podman pull ghcr.io/fisherrjd/osrs_ge-fetcher:latest"
       ];
       ExecStart = "${pkgs.podman}/bin/podman play kube /path/to/osrs_ge/pod.yaml";
-      ExecStop = "${pkgs.podman}/bin/podman pod stop osrs-ge-api";
+      ExecStop = "${pkgs.podman}/bin/podman pod stop osrs_ge-api";
     };
   };
 }
@@ -124,8 +124,8 @@ For NixOS, you can integrate this into your configuration. Example snippet:
 ## CI/CD
 
 Images are automatically built and pushed to GitHub Container Registry on every push to `main`:
-- API image: `ghcr.io/fisherrjd/osrs-ge-api:latest`
-- Fetcher image: `ghcr.io/fisherrjd/osrs-ge-fetcher:latest`
+- API image: `ghcr.io/fisherrjd/osrs_ge-api:latest`
+- Fetcher image: `ghcr.io/fisherrjd/osrs_ge-fetcher:latest`
 
 ### Enable GitHub Actions
 
@@ -138,7 +138,7 @@ Images are automatically built and pushed to GitHub Container Registry on every 
 
 ### Database not populated
 If `/api/items` returns empty results:
-- Check data fetcher logs: `podman logs osrs-ge-api-data-fetcher`
+- Check data fetcher logs: `podman logs osrs_ge-api-data-fetcher`
 - Verify the database file exists in the mounted directory
 - Ensure the fetcher has internet access to reach OSRS wiki APIs
 

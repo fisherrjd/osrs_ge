@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: osrs-ge-api
+  name: osrs_ge-api
   labels:
-    app: osrs-ge-api
+    app: osrs_ge-api
 spec:
   containers:
     - name: api
-      image: ghcr.io/fisherrjd/osrs-ge-api:latest
+      image: ghcr.io/fisherrjd/osrs_ge-api:latest
       ports:
         - containerPort: 8000
           hostPort: 8000
@@ -19,7 +19,7 @@ spec:
           mountPath: /data
 
     - name: data-fetcher
-      image: ghcr.io/fisherrjd/osrs-ge-fetcher:latest
+      image: ghcr.io/fisherrjd/osrs_ge-fetcher:latest
       env:
         - name: DB_FILE
           value: 'sqlite:////data/item_data.db'

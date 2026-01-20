@@ -21,6 +21,8 @@ def get_session():
 # GET 	/api/items 	List items with pagination & filtering
 @router.get("")
 def get_items(
+    # Database session
+    session: Annotated[Session, Depends(get_session)],
     # Pagination parameters
     skip: Annotated[int, Query(ge=0, description="Number of items to skip")] = 0,
     limit: Annotated[int, Query(ge=1, le=100, description="Max items to return")] = 50,
@@ -52,8 +54,6 @@ def get_items(
     sort_order: Annotated[
         str, Query(pattern="^(asc|desc)$", description="Sort order")
     ] = "desc",
-    # Database session
-    session: Annotated[Session, Depends(get_session)] = Depends(get_session),
 ):
     """
     Get items with pagination and filtering.

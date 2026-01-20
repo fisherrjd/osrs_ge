@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, col, func, select
@@ -22,38 +22,47 @@ def get_session():
 @router.get("")
 def get_items(
     # Pagination parameters
-    skip: int = Query(default=0, ge=0, description="Number of items to skip"),
-    limit: int = Query(default=50, ge=1, le=100, description="Max items to return"),
+    skip: Annotated[int, Query(default=0, ge=0, description="Number of items to skip")],
+    limit: Annotated[
+        int, Query(default=50, ge=1, le=100, description="Max items to return")
+    ],
     # Filter parameters
-    members: Optional[bool] = Query(
-        default=None, description="Filter by members status"
-    ),
-    min_volume: Optional[int] = Query(
-        default=None, ge=0, description="Minimum 24h volume"
-    ),
-    max_volume: Optional[int] = Query(
-        default=None, ge=0, description="Maximum 24h volume"
-    ),
-    min_price: Optional[int] = Query(
-        default=None, ge=0, description="Minimum high price"
-    ),
-    max_price: Optional[int] = Query(default=None, description="Maximum high price"),
-    min_margin: Optional[int] = Query(
-        default=None, description="Minimum margin (profit after GE tax)"
-    ),
-    max_margin: Optional[int] = Query(
-        default=None, description="Maximum margin (profit after GE tax)"
-    ),
-    name: Optional[str] = Query(
-        default=None, description="Search by name (case-insensitive)"
-    ),
+    members: Annotated[
+        bool | None, Query(default=None, description="Filter by members status")
+    ],
+    min_volume: Annotated[
+        int | None, Query(default=None, ge=0, description="Minimum 24h volume")
+    ],
+    max_volume: Annotated[
+        int | None, Query(default=None, ge=0, description="Maximum 24h volume")
+    ],
+    min_price: Annotated[
+        int | None, Query(default=None, ge=0, description="Minimum high price")
+    ],
+    max_price: Annotated[
+        int | None, Query(default=None, description="Maximum high price")
+    ],
+    min_margin: Annotated[
+        int | None,
+        Query(default=None, description="Minimum margin (profit after GE tax)"),
+    ],
+    max_margin: Annotated[
+        int | None,
+        Query(default=None, description="Maximum margin (profit after GE tax)"),
+    ],
+    name: Annotated[
+        str | None,
+        Query(default=None, description="Search by name (case-insensitive)"),
+    ],
     # Sorting
-    sort_by: str = Query(default="volume_24h", description="Field to sort by"),
-    sort_order: str = Query(
-        default="desc", pattern="^(asc|desc)$", description="Sort order"
-    ),
+    sort_by: Annotated[
+        str, Query(default="volume_24h", description="Field to sort by")
+    ],
+    sort_order: Annotated[
+        str, Query(default="desc", pattern="^(asc|desc)$", description="Sort order")
+    ],
     # Database session
-    session: Session = Depends(get_session),
+    session: Annotated[Session, Depends(get_session)],
 ):
     """
     Get items with pagination and filtering.
@@ -64,7 +73,6 @@ def get_items(
     - /api/items?members=true&min_volume=10000     # Members items with volume > 10k
     - /api/items?name=dragon&sort_by=high          # Dragon items sorted by price
     """
-
     # Start building the query
     query = select(Item)
 
@@ -79,10 +87,10 @@ def get_items(
         query = query.where(Item.volume_24h <= max_volume)
 
     if min_price is not None:
-        query = query.where(Item.high >= min_price)
+        query = query.where(col(Item.high) >= min_price)
 
     if max_price is not None:
-        query = query.where(Item.high <= max_price)
+        query = query.where(col(Item.high) <= max_price)
 
     if min_margin is not None:
         query = query.where(Item.margin >= min_margin)

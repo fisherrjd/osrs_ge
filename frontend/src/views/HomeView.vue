@@ -163,25 +163,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
-    <!-- Header with green accent border -->
-    <header class="border-b-4 border-accent bg-card mb-6">
-      <div class="container mx-auto py-4 px-4 flex items-center justify-between">
-        <h1 class="text-2xl font-bold flex items-center gap-3">
-          <span class="text-primary">Varlamore Terminal</span>
-          <span
-            class="text-xs font-semibold px-2 py-1 rounded bg-secondary text-secondary-foreground"
-            >VT</span
-          >
-        </h1>
-        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-          <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-          <span>Live</span>
-        </div>
-      </div>
-    </header>
-
-    <div class="container mx-auto px-4 pb-8">
+  <div class="container mx-auto px-4 py-6 pb-8">
     <!-- Filters -->
     <div class="mb-6 space-y-4 p-4 bg-card rounded-lg border border-border">
       <div class="flex gap-4 flex-wrap">
@@ -353,7 +335,6 @@ onUnmounted(() => {
       >
         Next
       </Button>
-    </div>
     </div>
   </div>
 </template>

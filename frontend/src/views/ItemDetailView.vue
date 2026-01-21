@@ -66,26 +66,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <!-- Header -->
-    <header class="border-b-4 border-accent bg-card mb-6">
-      <div class="container mx-auto py-4 px-4">
-        <div class="flex items-center gap-4">
-          <Button
-            @click="goBack"
-            variant="outline"
-            class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-          >
-            ← Back
-          </Button>
-          <h1 class="text-2xl font-bold flex items-center gap-3">
-            <span class="text-primary">Item Details</span>
-          </h1>
-        </div>
-      </div>
-    </header>
-
-    <div class="container mx-auto px-4 pb-8">
+  <div class="container mx-auto px-4 py-6 pb-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+      <Button
+        @click="goBack"
+        variant="outline"
+        class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+      >
+        ← Back to Items
+      </Button>
+    </div>
       <div v-if="loading" class="text-center py-8 text-secondary">Loading...</div>
 
       <div v-else-if="error" class="text-center py-8">
@@ -265,6 +256,5 @@ onMounted(() => {
           </CardContent>
         </Card>
       </div>
-    </div>
   </div>
 </template>

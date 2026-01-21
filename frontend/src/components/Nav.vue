@@ -12,6 +12,18 @@ function handleLogin() {
   // Placeholder for future login functionality
   console.log('Login clicked')
 }
+
+function handleLatestNews() {
+  console.log('Latest News clicked')
+}
+
+function handleAIHub() {
+  console.log('AI Hub clicked')
+}
+
+function handlePortfolio() {
+  console.log('Portfolio clicked')
+}
 </script>
 
 <template>
@@ -27,21 +39,36 @@ function handleLogin() {
               >VT</span
             >
           </h1>
-        </div>
-
-        <!-- Right side - Live indicator and Login -->
-        <div class="flex items-center gap-6">
           <div class="flex items-center gap-2 text-sm text-muted-foreground">
             <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
             <span>Live</span>
           </div>
+        </div>
 
+        <!-- Right side - Live indicator and Navigation buttons -->
+        <div class="flex items-center gap-6">
           <Button
-            @click="handleLogin"
+            @click="handleLatestNews"
             variant="outline"
             class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
           >
-            Login
+            Latest News
+          </Button>
+
+          <Button
+            @click="handleAIHub"
+            variant="outline"
+            class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+          >
+            AI Hub
+          </Button>
+
+          <Button
+            @click="handlePortfolio"
+            variant="outline"
+            class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+          >
+            Investments
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import type { Item } from '@/types/item'
 import {
   Table,
@@ -17,6 +17,8 @@ const items = ref<Item[]>([])
 const loading = ref(true)
 const total = ref(0)
 const hasMore = ref(false)
+const lastUpdated = ref<Date | null>(null)
+let pollInterval: ReturnType<typeof setInterval> | null = null
 
 // Filter states
 const searchQuery = ref('')
@@ -48,8 +50,8 @@ function getMembershipIcon(members: boolean): string {
     : 'https://oldschool.runescape.wiki/images/Free-to-play_icon.png'
 }
 
-async function fetchItems() {
-  loading.value = true
+async function fetchItems(showLoading = true) {
+  if (showLoading) loading.value = true
   try {
     const params = new URLSearchParams()
     params.append('skip', String(currentPage.value * itemsPerPage))
@@ -82,11 +84,16 @@ async function fetchItems() {
     items.value = data.items
     total.value = data.total
     hasMore.value = data.has_more
+    lastUpdated.value = new Date()
   } catch (error) {
     console.error('Failed to fetch items:', error)
   } finally {
     loading.value = false
   }
+}
+
+function silentRefresh() {
+  fetchItems(false)
 }
 
 function nextPage() {
@@ -138,15 +145,24 @@ watch([searchQuery, minMargin, minVolume, membersFilter, maxTimeAgo], () => {
   applyFilters()
 })
 
-// Initial fetch
-fetchItems()
+// Polling setup - refresh every 60 seconds
+onMounted(() => {
+  fetchItems()
+  pollInterval = setInterval(silentRefresh, 60000)
+})
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval)
+  }
+})
 </script>
 
 <template>
   <div class="min-h-screen">
     <!-- Header with green accent border -->
     <header class="border-b-4 border-accent bg-card mb-6">
-      <div class="container mx-auto py-4 px-4">
+      <div class="container mx-auto py-4 px-4 flex items-center justify-between">
         <h1 class="text-2xl font-bold flex items-center gap-3">
           <span class="text-primary">Varlamore Terminal</span>
           <span
@@ -154,6 +170,13 @@ fetchItems()
             >VT</span
           >
         </h1>
+        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+          <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+          <span>Live</span>
+          <span v-if="lastUpdated" class="text-xs"
+            >· Updated {{ formatRelativeTime(Math.floor(lastUpdated.getTime() / 1000)) }}</span
+          >
+        </div>
       </div>
     </header>
 

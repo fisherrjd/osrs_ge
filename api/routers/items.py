@@ -1,7 +1,7 @@
 import time
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, col, func, select
 
 from api.db.item_data import engine
@@ -142,9 +142,19 @@ def get_items(
 
 
 # GET 	/api/items/{id} 	Get single item with current prices
-# @router.get("/items/{item_id}")
-def read_item(item_id: int):
-    return {"item_id": item_id}
+@router.get("/{item_id}")
+def read_item(
+    item_id: int,
+    session: Annotated[Session, Depends(get_session)],
+):
+    """Get a single item by ID."""
+    query = select(Item).where(Item.id == item_id)
+    item = session.exec(query).first()
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return item
 
 
 # GET 	/api/items/search?q={query} 	Fuzzy search by name

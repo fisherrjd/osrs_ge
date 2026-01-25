@@ -13,16 +13,20 @@ function handleLogin() {
   console.log('Login clicked')
 }
 
-function handleLatestNews() {
-  console.log('Latest News clicked')
+function handleNews() {
+  router.push('/news')
 }
 
-function handleAIHub() {
-  console.log('AI Hub clicked')
+function handleResearch() {
+  router.push('/research')
 }
 
 function handlePortfolio() {
-  console.log('Portfolio clicked')
+  router.push('/portfolio')
+}
+
+function handleScreener() {
+  router.push('/screener')
 }
 </script>
 
@@ -39,36 +43,53 @@ function handlePortfolio() {
               >VT</span
             >
           </h1>
-          <div class="flex items-center gap-2 text-sm text-muted-foreground">
-            <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-            <span>Live</span>
-          </div>
         </div>
 
-        <!-- Right side - Live indicator and Navigation buttons -->
-        <div class="flex items-center gap-6">
-          <Button
-            @click="handleLatestNews"
-            variant="outline"
-            class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-          >
-            Latest News
+        <!-- Center - Main Navigation -->
+        <div class="flex items-center gap-2">
+
+          <Button @click="handleNews" variant="ghost" class="text-foreground hover:bg-accent/50">
+            News
           </Button>
 
           <Button
-            @click="handleAIHub"
-            variant="outline"
-            class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+            @click="handleResearch"
+            variant="ghost"
+            class="text-foreground hover:bg-accent/50"
           >
-            AI Hub
+            Research
           </Button>
 
           <Button
             @click="handlePortfolio"
+            variant="ghost"
+            class="text-foreground hover:bg-accent/50"
+          >
+            Portfolio
+          </Button>
+
+          <Button
+            @click="handleScreener"
+            variant="ghost"
+            class="text-foreground hover:bg-accent/50"
+          >
+            Screener
+          </Button>
+        </div>
+
+        <!-- Right side - Live indicator and Login -->
+        <div class="flex items-center gap-6">
+          <div class="flex items-center gap-2 text-sm text-muted-foreground">
+            <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+            <span>Live</span>
+          </div>
+
+          <Button
+            @click="handleLogin"
             variant="outline"
             class="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
           >
-            Investments
+            Login
           </Button>
         </div>
       </div>

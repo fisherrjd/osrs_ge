@@ -29,6 +29,16 @@ spec:
         - name: db-storage
           mountPath: /data
 
+    - name: news-fetcher
+      image: ghcr.io/fisherrjd/osrs_ge-news:latest
+      imagePullPolicy: Always
+      env:
+        - name: DB_FILE
+          value: 'sqlite:////data/news.db'
+      volumeMounts:
+        - name: db-storage
+          mountPath: /data
+
   volumes:
     - name: db-storage
       hostPath:

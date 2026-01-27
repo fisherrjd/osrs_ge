@@ -30,12 +30,12 @@ let
 
   scripts = with pkgs; {
     inherit (uvEnv.wrappers) black ruff ty;
-    db = pkgs.pog {
-      name = "db";
-      script = ''
-        ${uvEnv}/bin/python -m api.db.item_data
-      '';
-    };
+    # db = pkgs.pog {
+    #   name = "db";
+    #   script = ''
+    #     ${uvEnv}/bin/python -m api.db.item_data
+    #   '';
+    # };
 
     __restart_api = pkgs.pog {
       name = "__restart_api";

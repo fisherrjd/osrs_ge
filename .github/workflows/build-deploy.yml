@@ -9,6 +9,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME_API: ${{ github.repository }}-api
   IMAGE_NAME_FETCHER: ${{ github.repository }}-fetcher
+  IMAGE_NAME_NEWS: ${{ github.repository }}-news
 
 jobs:
   build-and-push:
@@ -65,3 +66,22 @@ jobs:
           push: true
           tags: ${{ steps.meta-fetcher.outputs.tags }}
           labels: ${{ steps.meta-fetcher.outputs.labels }}
+
+      - name: Extract metadata for news image
+        id: meta-news
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_NEWS }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push news image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Containerfile.news
+          push: true
+          tags: ${{ steps.meta-news.outputs.tags }}
+          labels: ${{ steps.meta-news.outputs.labels }}

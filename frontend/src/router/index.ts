@@ -4,7 +4,7 @@ import ItemDetailView from '@/views/ItemDetailView.vue'
 import NewsView from '@/views/NewsView.vue'
 import ResearchView from '@/views/ResearchView.vue'
 import PortfolioView from '@/views/PortfolioView.vue'
-import ScreenerView from '@/views/ScreenerView.vue'
+import DumpsView from '@/views/DumpsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,9 +35,9 @@ const router = createRouter({
       component: PortfolioView,
     },
     {
-      path: '/screener',
-      name: 'screener',
-      component: ScreenerView,
+      path: '/dumps',
+      name: 'dumps',
+      component: DumpsView,
     },
   ],
 })

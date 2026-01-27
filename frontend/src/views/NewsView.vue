@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,54 +7,60 @@ import { Button } from '@/components/ui/button'
 type NewsCategory = 'all' | 'official' | 'reddit' | 'updates'
 
 const activeTab = ref<NewsCategory>('all')
+const loading = ref(true)
+const currentPage = ref(0)
+const itemsPerPage = 10
 
 interface NewsItem {
   id: number
   title: string
-  description: string
+  description: string | null
   source: 'official' | 'reddit'
   category: 'update' | 'patch' | 'community' | 'event'
   date: string
-  timeAgo: string
   url: string
-  upvotes?: number
-  comments?: number
+  upvotes?: number | null
+  comments?: number | null
+  score: number
 }
 
-const dummyNews: NewsItem[] = [
-  {
-    id: 1,
-    title: 'Varlamore: The Rising Kingdom - Part 2',
-    description: 'Continue your journey through the ancient kingdom of Varlamore. New quests, bosses, and rewards await brave adventurers in this second major content update.',
-    source: 'official',
-    category: 'update',
-    date: '2024-01-24',
-    timeAgo: '2 hours ago',
-    url: 'https://secure.runescape.com/m=news/varlamore-the-rising-kingdom-part-2',
-  },
-  {
-    id: 2,
-    title: 'Game Update - January 24th 2024',
-    description: 'This week sees various quality of life improvements, bug fixes, and balancing changes based on community feedback.',
-    source: 'official',
-    category: 'patch',
-    date: '2024-01-24',
-    timeAgo: '5 hours ago',
-    url: 'https://secure.runescape.com/m=news/game-update-january-24th-2024',
-  },
-  {
-    id: 3,
-    title: 'Finally hit 99 Runecrafting after 3 years of playing',
-    description: 'Started playing in 2021 and finally got my first 99. The grind was real but worth it. Here are some tips for anyone else going for it.',
-    source: 'reddit',
-    category: 'community',
-    date: '2024-01-24',
-    timeAgo: '1 hour ago',
-    url: 'https://www.reddit.com/r/2007scape/comments/example1',
-    upvotes: 2847,
-    comments: 342,
-  },
-]
+const newsItems = ref<NewsItem[]>([])
+
+async function fetchNews() {
+  loading.value = true
+  try {
+    const response = await fetch('https://osrs.jade.rip/api/news')
+    newsItems.value = await response.json()
+  } catch (error) {
+    console.error('Failed to fetch news:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchNews()
+})
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+  if (secondsAgo < 60) return 'Just now'
+
+  const minutesAgo = Math.floor(secondsAgo / 60)
+  if (minutesAgo < 60) return `${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ago`
+
+  const hoursAgo = Math.floor(minutesAgo / 60)
+  if (hoursAgo < 24) return `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ago`
+
+  const daysAgo = Math.floor(hoursAgo / 24)
+  if (daysAgo < 30) return `${daysAgo} day${daysAgo !== 1 ? 's' : ''} ago`
+
+  const monthsAgo = Math.floor(daysAgo / 30)
+  return `${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`
+}
 
 function openNewsItem(url: string) {
   window.open(url, '_blank', 'noopener,noreferrer')
@@ -67,12 +73,37 @@ const tabs: { key: NewsCategory; label: string }[] = [
   { key: 'updates', label: 'Game Updates' },
 ]
 
-function filteredNews() {
-  if (activeTab.value === 'all') return dummyNews
-  if (activeTab.value === 'official') return dummyNews.filter(n => n.source === 'official')
-  if (activeTab.value === 'reddit') return dummyNews.filter(n => n.source === 'reddit')
-  if (activeTab.value === 'updates') return dummyNews.filter(n => n.category === 'update' || n.category === 'patch')
-  return dummyNews
+const filteredNews = computed(() => {
+  let filtered = newsItems.value
+  if (activeTab.value === 'official') {
+    filtered = newsItems.value.filter(n => n.source === 'official')
+  } else if (activeTab.value === 'reddit') {
+    filtered = newsItems.value.filter(n => n.source === 'reddit')
+  } else if (activeTab.value === 'updates') {
+    filtered = newsItems.value.filter(n => n.category === 'update' || n.category === 'patch')
+  }
+  return filtered
+})
+
+const paginatedNews = computed(() => {
+  const start = currentPage.value * itemsPerPage
+  return filteredNews.value.slice(start, start + itemsPerPage)
+})
+
+const totalPages = computed(() => Math.ceil(filteredNews.value.length / itemsPerPage))
+const hasMore = computed(() => currentPage.value < totalPages.value - 1)
+
+function nextPage() {
+  if (hasMore.value) currentPage.value++
+}
+
+function previousPage() {
+  if (currentPage.value > 0) currentPage.value--
+}
+
+function onTabChange(tab: NewsCategory) {
+  activeTab.value = tab
+  currentPage.value = 0
 }
 
 function getCategoryBadgeVariant(category: NewsItem['category']): 'default' | 'secondary' | 'destructive' | 'outline' {
@@ -109,16 +140,19 @@ function formatCategory(category: NewsItem['category']): string {
             ? 'bg-accent text-accent-foreground'
             : 'text-muted-foreground hover:text-foreground'
         ]"
-        @click="activeTab = tab.key"
+        @click="onTabChange(tab.key)"
       >
         {{ tab.label }}
       </Button>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="loading" class="text-center py-8 text-secondary">Loading...</div>
+
     <!-- News Grid -->
-    <div class="grid gap-4">
+    <div v-else class="grid gap-4">
       <Card
-        v-for="item in filteredNews()"
+        v-for="item in paginatedNews"
         :key="item.id"
         class="hover:border-accent/50 transition-colors cursor-pointer"
         @click="openNewsItem(item.url)"
@@ -136,7 +170,7 @@ function formatCategory(category: NewsItem['category']): string {
               </div>
               <CardTitle class="text-lg leading-tight">{{ item.title }}</CardTitle>
             </div>
-            <span class="text-xs text-muted-foreground whitespace-nowrap">{{ item.timeAgo }}</span>
+            <span class="text-xs text-muted-foreground whitespace-nowrap">{{ formatTimeAgo(item.date) }}</span>
           </div>
         </CardHeader>
         <CardContent>
@@ -145,14 +179,14 @@ function formatCategory(category: NewsItem['category']): string {
           </CardDescription>
 
           <!-- Reddit-specific stats -->
-          <div v-if="item.source === 'reddit'" class="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
+          <div v-if="item.source === 'reddit' && item.upvotes" class="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
             <span class="flex items-center gap-1">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
               </svg>
               {{ item.upvotes?.toLocaleString() }}
             </span>
-            <span class="flex items-center gap-1">
+            <span v-if="item.comments" class="flex items-center gap-1">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -161,11 +195,38 @@ function formatCategory(category: NewsItem['category']): string {
           </div>
         </CardContent>
       </Card>
+
+      <!-- Empty State -->
+      <div v-if="paginatedNews.length === 0" class="text-center py-12">
+        <p class="text-muted-foreground">No news items found for this filter.</p>
+      </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-if="filteredNews().length === 0" class="text-center py-12">
-      <p class="text-muted-foreground">No news items found for this filter.</p>
+    <!-- Pagination -->
+    <div v-if="!loading && filteredNews.length > 0" class="mt-6 flex items-center justify-between">
+      <Button
+        @click="previousPage"
+        :disabled="currentPage === 0"
+        variant="outline"
+        class="border-accent text-accent hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+      >
+        Previous
+      </Button>
+
+      <div class="text-sm text-muted-foreground">
+        Page <span class="text-secondary font-medium">{{ currentPage + 1 }}</span> of
+        <span class="text-secondary font-medium">{{ totalPages }}</span>
+        (<span class="text-secondary font-medium">{{ filteredNews.length }}</span> items)
+      </div>
+
+      <Button
+        @click="nextPage"
+        :disabled="!hasMore"
+        variant="outline"
+        class="border-accent text-accent hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+      >
+        Next
+      </Button>
     </div>
   </div>
 </template>

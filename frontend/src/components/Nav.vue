@@ -25,8 +25,8 @@ function handlePortfolio() {
   router.push('/portfolio')
 }
 
-function handleScreener() {
-  router.push('/screener')
+function handleDumps() {
+  router.push('/dumps')
 }
 </script>
 
@@ -69,11 +69,11 @@ function handleScreener() {
           </Button>
 
           <Button
-            @click="handleScreener"
+            @click="handleDumps"
             variant="ghost"
             class="text-foreground hover:bg-accent/50"
           >
-            Screener
+            Dumps
           </Button>
         </div>
 

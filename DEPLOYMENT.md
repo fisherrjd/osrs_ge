@@ -2,11 +2,12 @@
 
 ## Overview
 
-The OSRS GE API runs as a Podman pod with two containers:
+The OSRS GE API runs as a Podman pod with three containers:
 - **API container**: FastAPI application serving the REST API
 - **Data fetcher container**: Background service that fetches OSRS item data every minute
+- **News fetcher container**: Background service that aggregates news from OSRS blog and Reddit every 30 minutes
 
-Both containers share a mounted SQLite database volume.
+All containers share a mounted volume for SQLite databases.
 
 ## Prerequisites
 
@@ -33,6 +34,7 @@ The pod is pre-configured to use `/var/lib/osrs-ge/data` for database storage.
 # Pull the latest images
 podman pull ghcr.io/fisherrjd/osrs_ge-api:latest
 podman pull ghcr.io/fisherrjd/osrs_ge-fetcher:latest
+podman pull ghcr.io/fisherrjd/osrs_ge-news:latest
 
 # Create and start the pod
 podman play kube pod.yaml
@@ -47,10 +49,12 @@ podman pod ps
 # Check container logs
 podman logs osrs_ge-api-api
 podman logs osrs_ge-api-data-fetcher
+podman logs osrs_ge-api-news-fetcher
 
 # Test the API
 curl http://localhost:8000/health
 curl http://localhost:8000/api/items
+curl http://localhost:8000/news
 ```
 
 ## Management
@@ -75,6 +79,7 @@ podman pod rm -f osrs_ge-api
 # Pull new images
 podman pull ghcr.io/fisherrjd/osrs_ge-api:latest
 podman pull ghcr.io/fisherrjd/osrs_ge-fetcher:latest
+podman pull ghcr.io/fisherrjd/osrs_ge-news:latest
 
 # Recreate the pod
 podman pod rm -f osrs_ge-api
@@ -88,6 +93,9 @@ podman logs -f osrs_ge-api-api
 
 # Follow data fetcher logs
 podman logs -f osrs_ge-api-data-fetcher
+
+# Follow news fetcher logs
+podman logs -f osrs_ge-api-news-fetcher
 ```
 
 ## NixOS Integration
@@ -113,6 +121,7 @@ For NixOS, you can integrate this into your configuration. Example snippet:
       ExecStartPre = [
         "${pkgs.podman}/bin/podman pull ghcr.io/fisherrjd/osrs_ge-api:latest"
         "${pkgs.podman}/bin/podman pull ghcr.io/fisherrjd/osrs_ge-fetcher:latest"
+        "${pkgs.podman}/bin/podman pull ghcr.io/fisherrjd/osrs_ge-news:latest"
       ];
       ExecStart = "${pkgs.podman}/bin/podman play kube /path/to/osrs_ge/pod.yaml";
       ExecStop = "${pkgs.podman}/bin/podman pod stop osrs_ge-api";
@@ -126,6 +135,7 @@ For NixOS, you can integrate this into your configuration. Example snippet:
 Images are automatically built and pushed to GitHub Container Registry on every push to `main`:
 - API image: `ghcr.io/fisherrjd/osrs_ge-api:latest`
 - Fetcher image: `ghcr.io/fisherrjd/osrs_ge-fetcher:latest`
+- News image: `ghcr.io/fisherrjd/osrs_ge-news:latest`
 
 ### Enable GitHub Actions
 
@@ -160,5 +170,6 @@ chmod 755 /var/lib/osrs-ge/data
 - `GET /health` - Health check
 - `GET /api/items` - List items with pagination and filtering
   - Query params: `skip`, `limit`, `members`, `min_volume`, `max_volume`, `min_price`, `max_price`, `name`, `sort_by`, `sort_order`
+- `GET /news` - Get aggregated news from OSRS blog and Reddit, sorted by score
 
 For full API documentation, visit `http://localhost:8000/docs` when the pod is running.

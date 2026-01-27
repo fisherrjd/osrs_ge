@@ -22,7 +22,7 @@ REDDIT_HEADERS = {
     "User-Agent": "OSRS-GE-Tracker/1.0 (by /u//Ok-Jellyfish-8658/)",
 }
 
-DB_FILE = os.getenv("DB_FILE", "sqlite:///news.db")
+DB_FILE = os.getenv("NEWS_DB_FILE", os.getenv("DB_FILE", "sqlite:///news.db"))
 
 engine = create_engine(DB_FILE)
 SQLModel.metadata.create_all(engine)

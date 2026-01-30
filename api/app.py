@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routers import dumps, items, news
+from api.routers import alerts, items, news
 
 app = FastAPI(
     title="OSRS GE Portfolio API",
@@ -21,7 +21,7 @@ app.add_middleware(
 # Include routers
 app.include_router(items.router, prefix="/api")
 app.include_router(news.router, prefix="/api")
-app.include_router(dumps.router, prefix="/api")
+app.include_router(alerts.router, prefix="/api")
 
 
 @app.get("/")

@@ -8,8 +8,8 @@ from api.db.item_data import engine
 from api.schemas.dump_event import DumpEvent
 
 router = APIRouter(
-    prefix="/dumps",
-    tags=["dumps"],
+    prefix="/alerts",
+    tags=["alerts"],
 )
 
 
@@ -20,7 +20,7 @@ def get_session():
 
 
 @router.get("")
-def get_dumps(
+def get_alerts(
     session: Annotated[Session, Depends(get_session)],
     # Pagination
     skip: Annotated[int, Query(ge=0, description="Number of events to skip")] = 0,
@@ -51,13 +51,13 @@ def get_dumps(
     ] = "desc",
 ):
     """
-    Get dump/spike events with pagination and filtering.
+    Get alerts (dump/spike events) with pagination and filtering.
 
     Example requests:
-    - /api/dumps                         # Latest 25 events
-    - /api/dumps?event_type=dump         # Only dumps
-    - /api/dumps?event_type=spike        # Only spikes
-    - /api/dumps?item_id=2&hours_ago=24  # Events for item 2 in last 24 hours
+    - /api/alerts                         # Latest 25 alerts
+    - /api/alerts?event_type=dump         # Only dumps
+    - /api/alerts?event_type=spike        # Only spikes
+    - /api/alerts?item_id=2&hours_ago=24  # Alerts for item 2 in last 24 hours
     """
     query = select(DumpEvent)
 
@@ -113,7 +113,7 @@ def get_dumps(
 
 
 @router.get("/{event_id}")
-def get_dump_event(
+def get_alert(
     event_id: int,
     session: Annotated[Session, Depends(get_session)],
 ):

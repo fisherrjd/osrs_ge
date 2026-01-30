@@ -128,7 +128,7 @@ async function fetchEvents(showLoading = true) {
       params.append('hours_ago', String(hoursAgoFilter.value))
     }
 
-    const response = await fetch(`https://osrs.jade.rip/api/dumps?${params}`)
+    const response = await fetch(`https://osrs.jade.rip/api/alerts?${params}`)
     const data = await response.json()
     events.value = data.events
     total.value = data.total
@@ -201,9 +201,9 @@ onUnmounted(() => {
   <div class="container mx-auto px-4 py-6 pb-8">
     <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-primary mb-2">Dump & Spike Tracker</h1>
+      <h1 class="text-3xl font-bold text-primary mb-2">Alerts</h1>
       <p class="text-muted-foreground">
-        Real-time detection of significant price movements with volume spikes.
+        Real-time detection of significant price dumps and spikes.
       </p>
     </div>
 
@@ -264,7 +264,7 @@ onUnmounted(() => {
       v-else-if="events.length === 0"
       class="bg-card rounded-lg border border-border p-8 text-center"
     >
-      <p class="text-muted-foreground">No dump or spike events detected yet.</p>
+      <p class="text-muted-foreground">No alerts detected yet.</p>
       <p class="text-sm text-muted-foreground mt-2">
         Events are detected when price changes ≥5% with volume ≥2x average.
       </p>

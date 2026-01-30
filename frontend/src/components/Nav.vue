@@ -25,8 +25,8 @@ function handlePortfolio() {
   router.push('/portfolio')
 }
 
-function handleDumps() {
-  router.push('/dumps')
+function handleAlerts() {
+  router.push('/alerts')
 }
 </script>
 
@@ -47,7 +47,6 @@ function handleDumps() {
 
         <!-- Center - Main Navigation -->
         <div class="flex items-center gap-2">
-
           <Button @click="handleNews" variant="ghost" class="text-foreground hover:bg-accent/50">
             News
           </Button>
@@ -68,12 +67,8 @@ function handleDumps() {
             Portfolio
           </Button>
 
-          <Button
-            @click="handleDumps"
-            variant="ghost"
-            class="text-foreground hover:bg-accent/50"
-          >
-            Dumps
+          <Button @click="handleAlerts" variant="ghost" class="text-foreground hover:bg-accent/50">
+            Alerts
           </Button>
         </div>
 

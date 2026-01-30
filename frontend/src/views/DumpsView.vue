@@ -17,6 +17,7 @@ interface DumpEvent {
   item_id: number
   item_name: string
   event_type: 'dump' | 'spike'
+  severity: 'ok' | 'good' | 'great'
   detected_at: string
   trigger_price: number
   baseline_price: number
@@ -35,6 +36,7 @@ let pollInterval: ReturnType<typeof setInterval> | null = null
 
 // Filter state
 const eventTypeFilter = ref<'all' | 'dump' | 'spike'>('all')
+const severityFilter = ref<'all' | 'ok' | 'good' | 'great'>('all')
 const hoursAgoFilter = ref<number | ''>('')
 
 // Pagination
@@ -75,6 +77,28 @@ function formatTime(isoString: string): string {
   return `${diffDays}d ago`
 }
 
+function getSeverityLabel(severity: string): string {
+  switch (severity) {
+    case 'great':
+      return 'GREAT'
+    case 'good':
+      return 'Good'
+    default:
+      return 'Ok'
+  }
+}
+
+function getSeverityClass(severity: string): string {
+  switch (severity) {
+    case 'great':
+      return 'bg-purple-600 hover:bg-purple-700 text-white'
+    case 'good':
+      return 'bg-blue-600 hover:bg-blue-700 text-white'
+    default:
+      return 'bg-gray-500 hover:bg-gray-600 text-white'
+  }
+}
+
 function navigateToItem(itemId: number) {
   router.push(`/item/${itemId}`)
 }
@@ -88,6 +112,10 @@ async function fetchEvents(showLoading = true) {
 
     if (eventTypeFilter.value !== 'all') {
       params.append('event_type', eventTypeFilter.value)
+    }
+
+    if (severityFilter.value !== 'all') {
+      params.append('severity', severityFilter.value)
     }
 
     if (hoursAgoFilter.value !== '') {
@@ -130,7 +158,7 @@ function applyFilters() {
 }
 
 // Watch for filter changes
-watch([eventTypeFilter, hoursAgoFilter], () => {
+watch([eventTypeFilter, severityFilter, hoursAgoFilter], () => {
   applyFilters()
 })
 
@@ -169,6 +197,19 @@ onUnmounted(() => {
             <option value="all">All Events</option>
             <option value="dump">Dumps Only</option>
             <option value="spike">Spikes Only</option>
+          </select>
+        </div>
+
+        <div class="w-[180px]">
+          <label class="text-sm font-medium mb-2 block text-secondary">Severity</label>
+          <select
+            v-model="severityFilter"
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          >
+            <option value="all">All Severities</option>
+            <option value="great">GREAT Only</option>
+            <option value="good">Good+</option>
+            <option value="ok">Ok+</option>
           </select>
         </div>
 
@@ -215,6 +256,7 @@ onUnmounted(() => {
             <TableHead class="text-accent font-semibold">Time</TableHead>
             <TableHead class="text-accent font-semibold">Item</TableHead>
             <TableHead class="text-accent font-semibold">Type</TableHead>
+            <TableHead class="text-accent font-semibold">Severity</TableHead>
             <TableHead class="text-right text-accent font-semibold">Price Change</TableHead>
             <TableHead class="text-right text-accent font-semibold">Volume Change</TableHead>
             <TableHead class="text-right text-accent font-semibold">Trigger Price</TableHead>
@@ -240,6 +282,11 @@ onUnmounted(() => {
                 :class="event.event_type === 'spike' ? 'bg-green-600 hover:bg-green-700' : ''"
               >
                 {{ event.event_type === 'dump' ? '↓ Dump' : '↑ Spike' }}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <Badge :class="getSeverityClass(event.severity)">
+                {{ getSeverityLabel(event.severity) }}
               </Badge>
             </TableCell>
             <TableCell

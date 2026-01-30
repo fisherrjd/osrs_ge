@@ -30,6 +30,10 @@ def get_dumps(
         str | None,
         Query(pattern="^(dump|spike)$", description="Filter by event type"),
     ] = None,
+    severity: Annotated[
+        str | None,
+        Query(pattern="^(ok|good|great)$", description="Filter by minimum severity"),
+    ] = None,
     item_id: Annotated[int | None, Query(description="Filter by item ID")] = None,
     hours_ago: Annotated[
         int | None, Query(ge=1, description="Only show events from last N hours")
@@ -53,6 +57,14 @@ def get_dumps(
     # Apply filters
     if event_type:
         query = query.where(DumpEvent.event_type == event_type)
+
+    if severity:
+        # Filter by minimum severity (great > good > ok)
+        if severity == "great":
+            query = query.where(DumpEvent.severity == "great")
+        elif severity == "good":
+            query = query.where(DumpEvent.severity.in_(["good", "great"]))
+        # "ok" shows all, no filter needed
 
     if item_id:
         query = query.where(DumpEvent.item_id == item_id)

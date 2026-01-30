@@ -12,6 +12,7 @@ class DumpEvent(SQLModel, table=True):
     item_id: int = Field(index=True)
     item_name: str
     event_type: str = Field(index=True)  # "dump" or "spike"
+    severity: str = Field(index=True)  # "ok", "good", "great"
     detected_at: datetime = Field(index=True)
 
     # Price data

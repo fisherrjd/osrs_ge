@@ -6,10 +6,27 @@ from api.schemas.dump_event import DumpEvent
 from api.schemas.item_model import Item
 from api.schemas.item_volume_5m import ItemSnapshot
 
-# Detection thresholds
+# Detection thresholds (minimum for "ok" tier)
 PRICE_CHANGE_THRESHOLD = 0.05  # 5% price change
 VOLUME_SPIKE_THRESHOLD = 2.0  # 2x average volume
 BASELINE_SNAPSHOTS = 12  # 1 hour of 5-minute snapshots
+
+# Severity tier thresholds (price change %)
+# ok:    5-10%  price change
+# good:  10-20% price change
+# great: 20%+   price change
+TIER_GOOD_THRESHOLD = 0.10  # 10%
+TIER_GREAT_THRESHOLD = 0.20  # 20%
+
+
+def calculate_severity(price_change_percent: float) -> str:
+    """Determine severity tier based on price change magnitude."""
+    abs_change = abs(price_change_percent)
+    if abs_change >= TIER_GREAT_THRESHOLD:
+        return "great"
+    elif abs_change >= TIER_GOOD_THRESHOLD:
+        return "good"
+    return "ok"
 
 
 def get_baseline_stats(
@@ -88,6 +105,7 @@ def detect_event(
             item_id=item_id,
             item_name=item_name,
             event_type="dump",
+            severity=calculate_severity(price_change),
             detected_at=datetime.now(timezone.utc),
             trigger_price=current_price,
             baseline_price=baseline_price,
@@ -106,6 +124,7 @@ def detect_event(
             item_id=item_id,
             item_name=item_name,
             event_type="spike",
+            severity=calculate_severity(price_change),
             detected_at=datetime.now(timezone.utc),
             trigger_price=current_price,
             baseline_price=baseline_price,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, shallowRef } from 'vue'
 import { Line, Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -14,6 +14,8 @@ import {
   Filler,
   type ChartData,
   type ChartOptions,
+  type TooltipModel,
+  type Chart,
 } from 'chart.js'
 import type { HistoryPeriod, ItemHistoryResponse } from '@/types/item'
 import { Button } from '@/components/ui/button'
@@ -45,6 +47,23 @@ const selectedPeriod = ref<HistoryPeriod>('1d')
 const historyData = ref<ItemHistoryResponse | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+// Custom tooltip state
+const tooltipVisible = ref(false)
+const tooltipX = ref(0)
+const tooltipY = ref(0)
+const tooltipData = ref<{
+  title: string
+  buyPrice: string | null
+  sellPrice: string | null
+  buyVolume: string | null
+  sellVolume: string | null
+} | null>(null)
+
+// Chart refs for crosshair sync
+const priceChartRef = shallowRef<Chart | null>(null)
+const volumeChartRef = shallowRef<Chart | null>(null)
+const activeIndex = ref<number | null>(null)
 
 function formatTimestamp(timestamp: string, period: HistoryPeriod): string {
   const date = new Date(timestamp)
@@ -81,6 +100,61 @@ function formatVolume(value: number): string {
     return (value / 1_000).toFixed(0) + 'K'
   }
   return value.toString()
+}
+
+// External tooltip handler
+function externalTooltipHandler(context: { chart: Chart; tooltip: TooltipModel<'line' | 'bar'> }) {
+  const { chart, tooltip } = context
+
+  if (tooltip.opacity === 0) {
+    tooltipVisible.value = false
+    activeIndex.value = null
+    return
+  }
+
+  const dataIndex = tooltip.dataPoints?.[0]?.dataIndex
+  if (dataIndex === undefined || !historyData.value) return
+
+  activeIndex.value = dataIndex
+  const dataPoint = historyData.value.data[dataIndex]
+
+  tooltipData.value = {
+    title: tooltip.title[0] || '',
+    buyPrice: dataPoint.avg_high_price ? formatGold(dataPoint.avg_high_price) + ' gp' : null,
+    sellPrice: dataPoint.avg_low_price ? formatGold(dataPoint.avg_low_price) + ' gp' : null,
+    buyVolume: dataPoint.high_price_volume ? formatVolume(dataPoint.high_price_volume) : null,
+    sellVolume: dataPoint.low_price_volume ? formatVolume(dataPoint.low_price_volume) : null,
+  }
+
+  const position = chart.canvas.getBoundingClientRect()
+  tooltipX.value = position.left + window.scrollX + tooltip.caretX
+  tooltipY.value = position.top + window.scrollY + tooltip.caretY
+  tooltipVisible.value = true
+}
+
+// Crosshair plugin
+const crosshairLine = {
+  id: 'crosshairLine',
+  afterDraw(chart: Chart) {
+    if (activeIndex.value === null) return
+
+    const meta = chart.getDatasetMeta(0)
+    if (!meta.data[activeIndex.value]) return
+
+    const x = meta.data[activeIndex.value].x
+    const ctx = chart.ctx
+    const yAxis = chart.scales.y
+
+    ctx.save()
+    ctx.beginPath()
+    ctx.moveTo(x, yAxis.top)
+    ctx.lineTo(x, yAxis.bottom)
+    ctx.lineWidth = 1
+    ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)'
+    ctx.setLineDash([4, 4])
+    ctx.stroke()
+    ctx.restore()
+  },
 }
 
 const priceChartData = computed<ChartData<'line'>>(() => {
@@ -160,27 +234,11 @@ const priceChartOptions = computed<ChartOptions<'line'>>(() => ({
   },
   plugins: {
     legend: {
-      position: 'top',
-      labels: {
-        color: 'hsl(var(--muted-foreground))',
-        usePointStyle: true,
-        padding: 20,
-      },
+      display: false,
     },
     tooltip: {
-      backgroundColor: 'rgba(30, 41, 59, 0.95)',
-      titleColor: '#e2e8f0',
-      bodyColor: '#e2e8f0',
-      borderColor: 'rgba(148, 163, 184, 0.3)',
-      borderWidth: 1,
-      padding: 12,
-      callbacks: {
-        label: (context) => {
-          const value = context.parsed.y
-          if (value === null) return ''
-          return `${context.dataset.label}: ${formatGold(value)} gp`
-        },
-      },
+      enabled: false,
+      external: externalTooltipHandler,
     },
   },
   scales: {
@@ -211,19 +269,8 @@ const volumeChartOptions = computed<ChartOptions<'bar'>>(() => ({
       display: false,
     },
     tooltip: {
-      backgroundColor: 'rgba(30, 41, 59, 0.95)',
-      titleColor: '#e2e8f0',
-      bodyColor: '#e2e8f0',
-      borderColor: 'rgba(148, 163, 184, 0.3)',
-      borderWidth: 1,
-      padding: 12,
-      callbacks: {
-        label: (context) => {
-          const value = context.parsed.y
-          if (value === null) return ''
-          return `${context.dataset.label}: ${formatVolume(value)}`
-        },
-      },
+      enabled: false,
+      external: externalTooltipHandler,
     },
   },
   scales: {
@@ -247,6 +294,9 @@ const volumeChartOptions = computed<ChartOptions<'bar'>>(() => ({
     },
   },
 }))
+
+const priceChartPlugins = [crosshairLine]
+const volumeChartPlugins = [crosshairLine]
 
 async function fetchHistory() {
   loading.value = true
@@ -278,6 +328,11 @@ watch(
   },
   { immediate: true },
 )
+
+function handleChartMouseLeave() {
+  tooltipVisible.value = false
+  activeIndex.value = null
+}
 </script>
 
 <template>
@@ -297,7 +352,7 @@ watch(
     </div>
 
     <!-- Charts Container -->
-    <div class="relative">
+    <div class="relative" @mouseleave="handleChartMouseLeave">
       <div
         v-if="loading"
         class="absolute inset-0 flex items-center justify-center bg-background/50 z-10"
@@ -319,13 +374,64 @@ watch(
       <template v-else>
         <!-- Price Chart - 80% -->
         <div class="h-80">
-          <Line :data="priceChartData" :options="priceChartOptions" />
+          <Line :data="priceChartData" :options="priceChartOptions" :plugins="priceChartPlugins" />
         </div>
         <!-- Volume Chart - 20% -->
         <div class="h-20">
-          <Bar :data="volumeChartData" :options="volumeChartOptions" />
+          <Bar
+            :data="volumeChartData"
+            :options="volumeChartOptions"
+            :plugins="volumeChartPlugins"
+          />
         </div>
       </template>
+
+      <!-- Custom Tooltip -->
+      <div
+        v-if="tooltipVisible && tooltipData"
+        class="fixed z-50 pointer-events-none px-3 py-2 rounded-lg shadow-lg border text-sm"
+        :style="{
+          left: tooltipX + 'px',
+          top: tooltipY + 'px',
+          transform: 'translate(-50%, -100%) translateY(-8px)',
+          backgroundColor: 'rgba(30, 41, 59, 0.95)',
+          borderColor: 'rgba(148, 163, 184, 0.3)',
+          color: '#e2e8f0',
+        }"
+      >
+        <div class="font-medium mb-1">{{ tooltipData.title }}</div>
+        <div class="space-y-0.5 text-xs">
+          <div class="flex justify-between gap-4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-green-500"></span>
+              Buy:
+            </span>
+            <span>{{ tooltipData.buyPrice || '-' }}</span>
+          </div>
+          <div class="flex justify-between gap-4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-red-500"></span>
+              Sell:
+            </span>
+            <span>{{ tooltipData.sellPrice || '-' }}</span>
+          </div>
+          <div class="border-t border-slate-600 my-1"></div>
+          <div class="flex justify-between gap-4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-green-500/60"></span>
+              Buy Vol:
+            </span>
+            <span>{{ tooltipData.buyVolume || '-' }}</span>
+          </div>
+          <div class="flex justify-between gap-4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-red-500/60"></span>
+              Sell Vol:
+            </span>
+            <span>{{ tooltipData.sellVolume || '-' }}</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Resolution Info -->

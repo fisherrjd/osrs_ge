@@ -43,6 +43,10 @@ const hoursAgoFilter = ref<number | ''>('')
 const currentPage = ref(0)
 const eventsPerPage = 20
 
+// Sorting
+const sortBy = ref('detected_at')
+const sortOrder = ref<'asc' | 'desc'>('desc')
+
 function formatPrice(value: number): string {
   if (value >= 1_000_000_000) {
     return (value / 1_000_000_000).toFixed(2) + 'b'
@@ -109,6 +113,8 @@ async function fetchEvents(showLoading = true) {
     const params = new URLSearchParams()
     params.append('skip', String(currentPage.value * eventsPerPage))
     params.append('limit', String(eventsPerPage))
+    params.append('sort_by', sortBy.value)
+    params.append('sort_order', sortOrder.value)
 
     if (eventTypeFilter.value !== 'all') {
       params.append('event_type', eventTypeFilter.value)
@@ -155,6 +161,22 @@ function previousPage() {
 function applyFilters() {
   currentPage.value = 0
   fetchEvents()
+}
+
+function toggleSort(column: string) {
+  if (sortBy.value === column) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = column
+    sortOrder.value = 'desc'
+  }
+  currentPage.value = 0
+  fetchEvents()
+}
+
+function getSortIcon(column: string): string {
+  if (sortBy.value !== column) return '↕'
+  return sortOrder.value === 'asc' ? '↑' : '↓'
 }
 
 // Watch for filter changes
@@ -253,12 +275,27 @@ onUnmounted(() => {
       <Table>
         <TableHeader>
           <TableRow class="bg-accent/10 hover:bg-accent/10">
-            <TableHead class="text-accent font-semibold">Time</TableHead>
+            <TableHead
+              class="text-accent font-semibold cursor-pointer hover:bg-accent/20"
+              @click="toggleSort('detected_at')"
+            >
+              Time {{ getSortIcon('detected_at') }}
+            </TableHead>
             <TableHead class="text-accent font-semibold">Item</TableHead>
             <TableHead class="text-accent font-semibold">Type</TableHead>
             <TableHead class="text-accent font-semibold">Severity</TableHead>
-            <TableHead class="text-right text-accent font-semibold">Price Change</TableHead>
-            <TableHead class="text-right text-accent font-semibold">Volume Change</TableHead>
+            <TableHead
+              class="text-right text-accent font-semibold cursor-pointer hover:bg-accent/20"
+              @click="toggleSort('price_change_percent')"
+            >
+              Price Change {{ getSortIcon('price_change_percent') }}
+            </TableHead>
+            <TableHead
+              class="text-right text-accent font-semibold cursor-pointer hover:bg-accent/20"
+              @click="toggleSort('volume_change_percent')"
+            >
+              Volume Change {{ getSortIcon('volume_change_percent') }}
+            </TableHead>
             <TableHead class="text-right text-accent font-semibold">Trigger Price</TableHead>
             <TableHead class="text-right text-accent font-semibold">Baseline</TableHead>
           </TableRow>

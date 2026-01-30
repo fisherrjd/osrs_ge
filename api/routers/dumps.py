@@ -39,8 +39,15 @@ def get_dumps(
         int | None, Query(ge=1, description="Only show events from last N hours")
     ] = None,
     # Sorting
+    sort_by: Annotated[
+        str,
+        Query(
+            pattern="^(detected_at|price_change_percent|volume_change_percent)$",
+            description="Field to sort by",
+        ),
+    ] = "detected_at",
     sort_order: Annotated[
-        str, Query(pattern="^(asc|desc)$", description="Sort order by time")
+        str, Query(pattern="^(asc|desc)$", description="Sort order")
     ] = "desc",
 ):
     """
@@ -78,10 +85,18 @@ def get_dumps(
     total = session.exec(count_query).one()
 
     # Apply sorting
-    if sort_order == "desc":
-        query = query.order_by(col(DumpEvent.detected_at).desc())
+    sort_column = getattr(DumpEvent, sort_by, DumpEvent.detected_at)
+    # For price_change_percent, sort by absolute value (biggest swings first)
+    if sort_by == "price_change_percent":
+        if sort_order == "desc":
+            query = query.order_by(func.abs(col(sort_column)).desc())
+        else:
+            query = query.order_by(func.abs(col(sort_column)).asc())
     else:
-        query = query.order_by(col(DumpEvent.detected_at).asc())
+        if sort_order == "desc":
+            query = query.order_by(col(sort_column).desc())
+        else:
+            query = query.order_by(col(sort_column).asc())
 
     # Apply pagination
     query = query.offset(skip).limit(limit)

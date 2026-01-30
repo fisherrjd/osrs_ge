@@ -126,9 +126,8 @@ function externalTooltipHandler(context: { chart: Chart; tooltip: TooltipModel<'
     sellVolume: dataPoint.low_price_volume ? formatVolume(dataPoint.low_price_volume) : null,
   }
 
-  const position = chart.canvas.getBoundingClientRect()
-  tooltipX.value = position.left + window.scrollX + tooltip.caretX
-  tooltipY.value = position.top + window.scrollY + tooltip.caretY
+  tooltipX.value = tooltip.caretX
+  tooltipY.value = tooltip.caretY
   tooltipVisible.value = true
 }
 
@@ -157,6 +156,17 @@ const crosshairLine = {
   },
 }
 
+// Fill gaps by carrying forward the last known value
+function fillGaps<T>(arr: (T | null)[], defaultValue: T): T[] {
+  let lastValue = defaultValue
+  return arr.map((val) => {
+    if (val !== null) {
+      lastValue = val
+    }
+    return lastValue
+  })
+}
+
 const priceChartData = computed<ChartData<'line'>>(() => {
   if (!historyData.value || historyData.value.data.length === 0) {
     return { labels: [], datasets: [] }
@@ -165,12 +175,22 @@ const priceChartData = computed<ChartData<'line'>>(() => {
   const data = historyData.value.data
   const labels = data.map((d) => formatTimestamp(d.timestamp, selectedPeriod.value))
 
+  // Fill gaps in price data
+  const buyPrices = fillGaps(
+    data.map((d) => d.avg_high_price),
+    0,
+  )
+  const sellPrices = fillGaps(
+    data.map((d) => d.avg_low_price),
+    0,
+  )
+
   return {
     labels,
     datasets: [
       {
         label: 'Buy Price',
-        data: data.map((d) => d.avg_high_price),
+        data: buyPrices,
         borderColor: 'rgb(34, 197, 94)',
         fill: false,
         tension: 0.3,
@@ -180,7 +200,7 @@ const priceChartData = computed<ChartData<'line'>>(() => {
       },
       {
         label: 'Sell Price',
-        data: data.map((d) => d.avg_low_price),
+        data: sellPrices,
         borderColor: 'rgb(239, 68, 68)',
         fill: false,
         tension: 0.3,
@@ -200,12 +220,22 @@ const volumeChartData = computed<ChartData<'bar'>>(() => {
   const data = historyData.value.data
   const labels = data.map((d) => formatTimestamp(d.timestamp, selectedPeriod.value))
 
+  // Fill gaps in volume data
+  const buyVolumes = fillGaps(
+    data.map((d) => d.high_price_volume),
+    0,
+  )
+  const sellVolumes = fillGaps(
+    data.map((d) => d.low_price_volume),
+    0,
+  )
+
   return {
     labels,
     datasets: [
       {
         label: 'Buy Volume',
-        data: data.map((d) => d.high_price_volume),
+        data: buyVolumes,
         backgroundColor: 'rgba(34, 197, 94, 0.6)',
         borderColor: 'rgba(34, 197, 94, 0.8)',
         borderWidth: 1,
@@ -214,7 +244,7 @@ const volumeChartData = computed<ChartData<'bar'>>(() => {
       },
       {
         label: 'Sell Volume',
-        data: data.map((d) => d.low_price_volume),
+        data: sellVolumes,
         backgroundColor: 'rgba(239, 68, 68, 0.6)',
         borderColor: 'rgba(239, 68, 68, 0.8)',
         borderWidth: 1,
@@ -389,11 +419,11 @@ function handleChartMouseLeave() {
       <!-- Custom Tooltip -->
       <div
         v-if="tooltipVisible && tooltipData"
-        class="fixed z-50 pointer-events-none px-3 py-2 rounded-lg shadow-lg border text-sm"
+        class="absolute z-50 pointer-events-none px-3 py-2 rounded-lg shadow-lg border text-sm"
         :style="{
           left: tooltipX + 'px',
           top: tooltipY + 'px',
-          transform: 'translate(-50%, -100%) translateY(-8px)',
+          transform: 'translate(-50%, -100%) translateY(-16px)',
           backgroundColor: 'rgba(30, 41, 59, 0.95)',
           borderColor: 'rgba(148, 163, 184, 0.3)',
           color: '#e2e8f0',

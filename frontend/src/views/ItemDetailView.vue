@@ -13,9 +13,18 @@ const item = ref<Item | null>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 
-function formatGold(value: number | null): string {
+function formatNumber(value: number | null): string {
   if (value === null) return '-'
-  return value.toLocaleString() + ' gp'
+  if (value >= 1_000_000_000) {
+    return (value / 1_000_000_000).toFixed(2) + 'b'
+  }
+  if (value >= 1_000_000) {
+    return (value / 1_000_000).toFixed(2) + 'm'
+  }
+  if (value >= 1_000) {
+    return (value / 1_000).toFixed(0) + 'k'
+  }
+  return value.toLocaleString()
 }
 
 function getIconUrl(icon: string): string {
@@ -133,7 +142,7 @@ onMounted(() => {
         <Card>
           <CardContent class="pt-4 pb-3">
             <div class="text-xs text-muted-foreground mb-1">Buy Price</div>
-            <div class="text-xl font-bold text-primary">{{ formatGold(item.high) }}</div>
+            <div class="text-xl font-bold text-primary">{{ formatNumber(item.high) }}</div>
             <div class="text-xs text-muted-foreground mt-1">
               {{ formatRelativeTime(item.highTime) }}
             </div>
@@ -144,7 +153,7 @@ onMounted(() => {
         <Card>
           <CardContent class="pt-4 pb-3">
             <div class="text-xs text-muted-foreground mb-1">Sell Price</div>
-            <div class="text-xl font-bold text-primary">{{ formatGold(item.low) }}</div>
+            <div class="text-xl font-bold text-primary">{{ formatNumber(item.low) }}</div>
             <div class="text-xs text-muted-foreground mt-1">
               {{ formatRelativeTime(item.lowTime) }}
             </div>
@@ -155,7 +164,7 @@ onMounted(() => {
         <Card>
           <CardContent class="pt-4 pb-3">
             <div class="text-xs text-muted-foreground mb-1">Margin</div>
-            <div class="text-xl font-bold text-primary">{{ formatGold(item.margin) }}</div>
+            <div class="text-xl font-bold text-primary">{{ formatNumber(item.margin) }}</div>
             <div class="text-xs text-muted-foreground mt-1">After tax</div>
           </CardContent>
         </Card>
@@ -164,7 +173,7 @@ onMounted(() => {
         <Card>
           <CardContent class="pt-4 pb-3">
             <div class="text-xs text-muted-foreground mb-1">Volume (24h)</div>
-            <div class="text-xl font-bold text-primary">{{ item.volume_24h.toLocaleString() }}</div>
+            <div class="text-xl font-bold text-primary">{{ formatNumber(item.volume_24h) }}</div>
             <div class="text-xs text-muted-foreground mt-1">Items traded</div>
           </CardContent>
         </Card>
@@ -187,15 +196,18 @@ onMounted(() => {
               </div>
             </div>
             <div>
-              <div class="text-sm text-muted-foreground mb-1">Max Daily Profit</div>
+              <div class="text-sm text-muted-foreground mb-1">Profit per Limit</div>
               <div class="text-2xl font-bold text-primary">
-                {{ item.limit ? formatGold(item.margin * item.limit) : 'N/A' }}
+                {{ item.limit ? formatNumber(item.margin * item.limit) : 'N/A' }}
+              </div>
+              <div class="text-xs text-muted-foreground mt-1">
+                {{ item.limit ? formatNumber(item.margin * item.limit * 6) + '/day' : '' }}
               </div>
             </div>
             <div>
               <div class="text-sm text-muted-foreground mb-1">Tax per Item</div>
               <div class="text-2xl font-bold text-primary">
-                {{ item.high ? formatGold(Math.floor(item.high * 0.01)) : 'N/A' }}
+                {{ item.high ? formatNumber(Math.floor(item.high * 0.01)) : 'N/A' }}
               </div>
             </div>
           </div>
@@ -211,8 +223,8 @@ onMounted(() => {
         </CardContent>
       </Card>
 
-      <!-- Item Details Card -->
-      <Card>
+      <!--<!-- Item Details Card -->
+      <!-- <Card>
         <CardHeader>
           <CardTitle class="text-accent">Item Information</CardTitle>
         </CardHeader>
@@ -221,21 +233,23 @@ onMounted(() => {
             <div class="space-y-3">
               <div class="flex justify-between py-2 border-b border-border">
                 <span class="text-muted-foreground">Buy Limit:</span>
-                <span class="text-secondary font-medium">{{ item.limit || 'N/A' }}</span>
+                <span class="text-secondary font-medium">{{
+                  item.limit ? formatNumber(item.limit) : 'N/A'
+                }}</span>
               </div>
               <div class="flex justify-between py-2 border-b border-border">
                 <span class="text-muted-foreground">High Alch:</span>
-                <span class="text-secondary font-medium">{{ formatGold(item.highalch) }}</span>
+                <span class="text-secondary font-medium">{{ formatNumber(item.highalch) }}</span>
               </div>
               <div class="flex justify-between py-2 border-b border-border">
                 <span class="text-muted-foreground">Low Alch:</span>
-                <span class="text-secondary font-medium">{{ formatGold(item.lowalch) }}</span>
+                <span class="text-secondary font-medium">{{ formatNumber(item.lowalch) }}</span>
               </div>
             </div>
             <div class="space-y-3">
               <div class="flex justify-between py-2 border-b border-border">
                 <span class="text-muted-foreground">Store Value:</span>
-                <span class="text-secondary font-medium">{{ formatGold(item.value) }}</span>
+                <span class="text-secondary font-medium">{{ formatNumber(item.value) }}</span>
               </div>
               <div class="flex justify-between py-2 border-b border-border">
                 <span class="text-muted-foreground">Icon URL:</span>
@@ -249,7 +263,7 @@ onMounted(() => {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card>-->
     </div>
   </div>
 </template>

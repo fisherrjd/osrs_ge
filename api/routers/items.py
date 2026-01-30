@@ -6,6 +6,7 @@ from sqlmodel import Session, col, func, select
 
 from api.db.item_data import engine
 from api.schemas.item_model import Item
+from api.schemas.item_volume_5m import ItemSnapshot
 
 router = APIRouter(
     prefix="/items",
@@ -159,8 +160,148 @@ def read_item(
 
 # GET 	/api/items/search?q={query} 	Fuzzy search by name
 #
-# GET 	/api/items/{id}/history 	Historical OHLCV data for charts
-#
 # GET 	/api/items/top-margins 	Top margin opportunities
 #
 # GET 	/api/items/top-volume 	Highest volume items
+
+
+# Time period configurations for chart views
+# Maps period name to (hours_of_data, bucket_size_in_hours)
+CHART_PERIODS = {
+    "1d": (24, None),  # 1 day: raw 5-min data (no aggregation)
+    "1w": (168, 1),  # 1 week: hourly averages
+    "1m": (720, 6),  # 1 month (30 days): 6-hour averages
+    "6m": (4320, 24),  # 6 months (180 days): daily averages
+}
+
+
+@router.get("/{item_id}/history")
+def get_item_history(
+    item_id: int,
+    session: Annotated[Session, Depends(get_session)],
+    period: Annotated[
+        str,
+        Query(
+            pattern="^(1d|1w|1m|6m)$",
+            description="Time period: 1d (5min), 1w (hourly), 1m (6hr), 6m (daily)",
+        ),
+    ] = "1d",
+):
+    """
+    Get time series data for an item with appropriate aggregation per period.
+
+    Periods and their resolutions:
+    - 1d: Raw 5-minute snapshots (288 data points)
+    - 1w: Hourly averages (168 data points)
+    - 1m: 6-hour averages (~120 data points)
+    - 6m: Daily averages (~180 data points)
+
+    Example requests:
+    - /api/items/2/history              # Last 24 hours, 5-min resolution
+    - /api/items/2/history?period=1w    # Last week, hourly resolution
+    - /api/items/2/history?period=1m    # Last month, 6-hour resolution
+    - /api/items/2/history?period=6m    # Last 6 months, daily resolution
+    """
+    from datetime import datetime, timedelta
+
+    # Verify item exists
+    item_query = select(Item).where(Item.id == item_id)
+    item = session.exec(item_query).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    hours_back, bucket_hours = CHART_PERIODS[period]
+    cutoff = datetime.utcnow() - timedelta(hours=hours_back)
+
+    if bucket_hours is None:
+        # Raw 5-minute data for 1d view
+        query = (
+            select(ItemSnapshot)
+            .where(ItemSnapshot.item_id == item_id)
+            .where(ItemSnapshot.timestamp >= cutoff)
+            .order_by(col(ItemSnapshot.timestamp).asc())
+        )
+        snapshots = session.exec(query).all()
+
+        return {
+            "item_id": item_id,
+            "item_name": item.name,
+            "period": period,
+            "resolution": "5m",
+            "count": len(snapshots),
+            "data": [
+                {
+                    "timestamp": s.timestamp.isoformat(),
+                    "avg_high_price": s.avg_high_price,
+                    "avg_low_price": s.avg_low_price,
+                    "high_price_volume": s.high_price_volume,
+                    "low_price_volume": s.low_price_volume,
+                    "total_volume": s.total_volume,
+                }
+                for s in snapshots
+            ],
+        }
+
+    # Aggregated data for longer periods
+    # Fetch raw data and aggregate in Python (SQLite strftime aggregation is limited)
+    query = (
+        select(ItemSnapshot)
+        .where(ItemSnapshot.item_id == item_id)
+        .where(ItemSnapshot.timestamp >= cutoff)
+        .order_by(col(ItemSnapshot.timestamp).asc())
+    )
+    snapshots = session.exec(query).all()
+
+    # Group snapshots into time buckets
+    buckets: dict[str, list[ItemSnapshot]] = {}
+    for s in snapshots:
+        # Calculate bucket key based on bucket_hours
+        bucket_time = s.timestamp.replace(
+            hour=(s.timestamp.hour // bucket_hours) * bucket_hours,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+        bucket_key = bucket_time.isoformat()
+        if bucket_key not in buckets:
+            buckets[bucket_key] = []
+        buckets[bucket_key].append(s)
+
+    # Aggregate each bucket
+    aggregated = []
+    for timestamp, bucket_snapshots in sorted(buckets.items()):
+        high_prices = [s.avg_high_price for s in bucket_snapshots if s.avg_high_price]
+        low_prices = [s.avg_low_price for s in bucket_snapshots if s.avg_low_price]
+        high_volumes = [
+            s.high_price_volume for s in bucket_snapshots if s.high_price_volume
+        ]
+        low_volumes = [
+            s.low_price_volume for s in bucket_snapshots if s.low_price_volume
+        ]
+        total_volumes = [s.total_volume for s in bucket_snapshots if s.total_volume]
+
+        aggregated.append(
+            {
+                "timestamp": timestamp,
+                "avg_high_price": sum(high_prices) / len(high_prices)
+                if high_prices
+                else None,
+                "avg_low_price": sum(low_prices) / len(low_prices)
+                if low_prices
+                else None,
+                "high_price_volume": sum(high_volumes) if high_volumes else None,
+                "low_price_volume": sum(low_volumes) if low_volumes else None,
+                "total_volume": sum(total_volumes) if total_volumes else None,
+            }
+        )
+
+    resolution_labels = {"1w": "1h", "1m": "6h", "6m": "1d"}
+
+    return {
+        "item_id": item_id,
+        "item_name": item.name,
+        "period": period,
+        "resolution": resolution_labels.get(period, "5m"),
+        "count": len(aggregated),
+        "data": aggregated,
+    }

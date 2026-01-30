@@ -12,8 +12,10 @@ from api.schemas.data_models import (
     Volume5m,
     Volume24h,
 )
+from api.schemas.dump_event import DumpEvent
 from api.schemas.item_model import Item
 from api.schemas.item_volume_5m import ItemSnapshot
+from api.services.spike_detector import run_detection_for_snapshots
 from api.util.margin import ge_margin
 
 LATEST_API_URL = "https://prices.runescape.wiki/api/v1/osrs/latest"
@@ -29,6 +31,10 @@ DB_FILE = os.getenv("DB_FILE", "sqlite:///item_data.db")
 
 engine = create_engine(DB_FILE)
 session = Session(engine)
+
+# Import DumpEvent to ensure it's registered with SQLModel metadata
+from api.schemas.dump_event import DumpEvent  # noqa: F811
+
 SQLModel.metadata.create_all(engine)
 
 
@@ -118,8 +124,10 @@ def update_database(latest_data, mapping_data, volume_data):
 
 
 def save_volume5m_to_db(volume_5m_data: Volume5m, engine):
-    """Save Volume5m pydantic model data to ItemSnapshot SQLModel table."""
+    """Save Volume5m pydantic model data to ItemSnapshot SQLModel table and detect events."""
     now = datetime.now(timezone.utc)
+    snapshots = []
+
     with Session(engine) as session:
         for item_id, item_data in volume_5m_data.data.items():
             high_vol = item_data.highPriceVolume or 0
@@ -135,7 +143,16 @@ def save_volume5m_to_db(volume_5m_data: Volume5m, engine):
                 total_volume=total_vol,
             )
             session.add(record)
+            snapshots.append(record)
         session.commit()
+
+        # Run spike/dump detection on the new snapshots
+        events = run_detection_for_snapshots(session, snapshots)
+        if events:
+            for event in events:
+                session.add(event)
+            session.commit()
+            print(f"Detected {len(events)} dump/spike events!")
 
 
 # Remove ingest_api_data function

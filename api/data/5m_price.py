@@ -1,11 +1,10 @@
-import os
 from datetime import datetime, timezone
 
 import requests
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session
 
+from api.db.connection import item_engine as engine
 from api.schemas.data_models import Volume5m
-from api.schemas.dump_event import DumpEvent
 from api.schemas.item_volume_5m import ItemSnapshot
 from api.services.spike_detector import run_detection_for_snapshots
 
@@ -15,14 +14,6 @@ HEADERS = {
     "User-Agent": "@PapaBear#2007",
     "From": "dev@jade.rip",
 }
-DB_FILE = os.getenv("DB_FILE", "sqlite:///item_data.db")
-
-engine = create_engine(DB_FILE)
-
-# Import DumpEvent to ensure it's registered with SQLModel metadata
-from api.schemas.dump_event import DumpEvent  # noqa: F811
-
-SQLModel.metadata.create_all(engine)
 
 
 def fetch_data(api_url) -> dict:

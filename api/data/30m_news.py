@@ -1,12 +1,11 @@
-import os
-import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
 import requests
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, select
 
+from api.db.connection import news_engine as engine
 from api.schemas.news_models import CategoryType, NewsItem, SourceType
 
 # API URLs
@@ -21,11 +20,6 @@ HEADERS = {
 REDDIT_HEADERS = {
     "User-Agent": "OSRS-GE-Tracker/1.0 (by /u//Ok-Jellyfish-8658/)",
 }
-
-DB_FILE = os.getenv("NEWS_DB_FILE", os.getenv("DB_FILE", "sqlite:///news.db"))
-
-engine = create_engine(DB_FILE)
-SQLModel.metadata.create_all(engine)
 
 
 def parse_osrs_category(title: str, summary: str) -> CategoryType:

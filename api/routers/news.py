@@ -1,10 +1,9 @@
-import time
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import Session, col, func, select
+from fastapi import APIRouter, Depends
+from sqlmodel import Session, col, select
 
-from api.db.news_data import engine
+from api.db.connection import news_engine as engine
 from api.schemas.news_models import NewsItem
 
 router = APIRouter(

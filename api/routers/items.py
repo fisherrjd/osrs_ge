@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, col, func, select
 
-from api.db.item_data import engine
+from api.db.connection import item_engine as engine
 from api.schemas.item_model import Item
 from api.schemas.item_volume_5m import ItemSnapshot
 

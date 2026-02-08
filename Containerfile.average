@@ -14,5 +14,5 @@ RUN uv sync --no-dev
 # Copy application code
 COPY api/ ./api/
 
-# Run the 30-minute news fetcher
-CMD ["uv", "run", "python", "-m", "api.data.30m_news"]
+# Run the 5-minute price fetcher
+CMD ["uv", "run", "python", "-m", "api.data.5m_price"]

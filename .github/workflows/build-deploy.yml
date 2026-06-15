@@ -8,7 +8,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME_API: ${{ github.repository }}-api
-  IMAGE_NAME_FETCHER: ${{ github.repository }}-fetcher
+  IMAGE_NAME_LATEST: ${{ github.repository }}-latest
+  IMAGE_NAME_AVERAGE: ${{ github.repository }}-average
   IMAGE_NAME_NEWS: ${{ github.repository }}-news
 
 jobs:
@@ -48,24 +49,43 @@ jobs:
           tags: ${{ steps.meta-api.outputs.tags }}
           labels: ${{ steps.meta-api.outputs.labels }}
 
-      - name: Extract metadata for fetcher image
-        id: meta-fetcher
+      - name: Extract metadata for latest image (1m price)
+        id: meta-latest
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FETCHER }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LATEST }}
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push fetcher image
+      - name: Build and push latest image (1m price)
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Containerfile.fetcher
+          file: ./Containerfile.latest
           push: true
-          tags: ${{ steps.meta-fetcher.outputs.tags }}
-          labels: ${{ steps.meta-fetcher.outputs.labels }}
+          tags: ${{ steps.meta-latest.outputs.tags }}
+          labels: ${{ steps.meta-latest.outputs.labels }}
+
+      - name: Extract metadata for average image (5m price)
+        id: meta-average
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_AVERAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push average image (5m price)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Containerfile.average
+          push: true
+          tags: ${{ steps.meta-average.outputs.tags }}
+          labels: ${{ steps.meta-average.outputs.labels }}
 
       - name: Extract metadata for news image
         id: meta-news
